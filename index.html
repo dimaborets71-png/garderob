@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 
-  <!-- PWA и iOS мета-теги (светлая тема) -->
-  <meta name="theme-color" content="#ffffff" />
+  <!-- PWA и iOS мета-теги (светлая минималистичная тема) -->
+  <meta name="theme-color" content="#f3f4f6" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
@@ -21,7 +21,7 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='28' fill='%23ffffff'/%3E%3Crect x='3' y='3' width='114' height='114' rx='25' fill='none' stroke='%23e5e7eb' stroke-width='4'/%3E%3Cpath d='M60 30c-6 0-10 4-10 9 0 3 2 5 5 7l5 2v5l-31 19c-4 2-2 8 3 8h56c5 0 7-6 3-8L60 53v-5' fill='none' stroke='%23111827' stroke-width='6' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M38 80h44v10a6 6 0 0 1-6 6H44a6 6 0 0 1-6-6V80z' fill='%23f3f4f6' stroke='%23111827' stroke-width='4' stroke-linejoin='round'/%3E%3C/svg%3E" />
 
   <style>
-    /* ===================== ДИЗАЙН-ТОКЕНЫ (СВЕТЛАЯ iOS-ТЕМА) ===================== */
+    /* ===================== 1. ДИЗАЙН-ТОКЕНЫ (СВЕТЛАЯ iOS-ТЕМА) ===================== */
     :root {
       --bg: #f3f4f6;
       --surface: #ffffff;
@@ -49,7 +49,8 @@
       --blue-soft: #dbeafe;
       --blue-text: #1e40af;
 
-      --red: #dc2626;
+      --red: #ef4444;
+      --red-dark: #dc2626;
       --red-soft: #fee2e2;
       --red-border: #fecaca;
       --red-text: #991b1b;
@@ -73,9 +74,9 @@
       padding: 0;
       height: 100%;
       min-height: 100vh;
-      background: #f3f4f6;
-      color: #111827;
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Segoe UI", Roboto, sans-serif;
       -webkit-font-smoothing: antialiased;
       -webkit-tap-highlight-color: transparent;
       overscroll-behavior-x: none;
@@ -136,7 +137,7 @@
       display: none;
     }
 
-    /* ===================== ОБОЛОЧКА ПРИЛОЖЕНИЯ ===================== */
+    /* ===================== 2. ОБОЛОЧКА ПРИЛОЖЕНИЯ ===================== */
     .app-shell {
       position: relative;
       width: 100%;
@@ -165,15 +166,15 @@
       }
     }
 
-    /* ===================== 1. ВЕРХНЯЯ ЛИПКАЯ ШАПКА ===================== */
+    /* ===================== 3. ВЕРХНЯЯ ЛИПКАЯ ШАПКА ===================== */
     .app-header {
       position: sticky;
       top: 0;
       z-index: 30;
       flex-shrink: 0;
-      background: rgba(255, 255, 255, 0.94);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
       padding: calc(env(safe-area-inset-top, 0px) + 10px) 12px 10px;
     }
@@ -297,7 +298,7 @@
       color: var(--blue-text);
     }
 
-    /* ===================== 2. БАННЕР РЕЖИМА ПРАВКИ ===================== */
+    /* ===================== 4. БАННЕР РЕЖИМА ПРАВКИ ===================== */
     .edit-banner {
       flex-shrink: 0;
       z-index: 25;
@@ -348,7 +349,7 @@
       background: var(--blue-hover);
     }
 
-    /* ===================== 3. ГОРИЗОНТАЛЬНЫЙ СВАЙП-ПЕЙДЖЕР ===================== */
+    /* ===================== 5. ГОРИЗОНТАЛЬНЫЙ СВАЙП-ПЕЙДЖЕР ===================== */
     .snap-container {
       flex: 1;
       min-height: 0;
@@ -371,7 +372,7 @@
       padding: 12px 10px calc(env(safe-area-inset-bottom, 0px) + 92px);
     }
 
-    /* ===================== 4. СЕКЦИИ И 3-КОЛОНОЧНАЯ СЕТКА ===================== */
+    /* ===================== 6. СЕКЦИИ, ПАНЕЛЬ НОСКИ И 3-КОЛОНОЧНАЯ СЕТКА ===================== */
     .wearing-panel {
       margin-bottom: 18px;
       padding: 11px 10px 10px;
@@ -412,6 +413,33 @@
       white-space: nowrap;
     }
 
+    .wearing-subsection {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .wearing-divider {
+      height: 1px;
+      background: #fed7aa;
+      margin: 12px 2px;
+      opacity: 0.8;
+    }
+
+    .subsection-caption {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .sort-hint {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+      margin-left: 2px;
+      white-space: nowrap;
+    }
+
     .section-block {
       margin-bottom: 20px;
     }
@@ -421,8 +449,8 @@
       align-items: center;
       justify-content: space-between;
       gap: 8px;
-      padding: 0 2px;
       margin-bottom: 9px;
+      padding: 0 2px;
     }
 
     .section-title-group {
@@ -430,154 +458,110 @@
       align-items: center;
       gap: 7px;
       min-width: 0;
+      flex-wrap: wrap;
     }
 
     .section-title {
       margin: 0;
       font-size: 15px;
       font-weight: 800;
-      letter-spacing: -0.015em;
       color: var(--text);
+      letter-spacing: -0.01em;
     }
 
     .section-count {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      min-width: 22px;
+      min-width: 20px;
       height: 20px;
       padding: 0 6px;
       border-radius: 999px;
-      background: var(--surface);
-      border: 1px solid var(--border);
+      background: #e5e7eb;
+      color: #374151;
       font-size: 11px;
       font-weight: 700;
-      color: var(--text-secondary);
     }
 
     .color-badge-dot {
-      width: 20px;
-      height: 20px;
-      border-radius: 999px;
+      width: 22px;
+      height: 22px;
+      border-radius: 7px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       flex-shrink: 0;
     }
     .color-badge-light {
-      background: #fef3c7;
+      background: #ffffff;
+      border: 1px solid var(--border-strong);
       color: #d97706;
-      border: 1px solid #fde68a;
     }
     .color-badge-dark {
-      background: #e5e7eb;
-      color: #1f2937;
-      border: 1px solid #d1d5db;
+      background: #111827;
+      border: 1px solid #111827;
+      color: #f9fafb;
     }
 
     .bulk-btn {
+      flex-shrink: 0;
       padding: 6px 12px;
-      border-radius: 10px;
+      border-radius: 9px;
       font-size: 12px;
       font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
       white-space: nowrap;
     }
     .bulk-btn-orange {
       background: var(--orange);
       color: #ffffff;
+      box-shadow: 0 2px 6px rgba(234, 88, 12, 0.24);
+    }
+    .bulk-btn-orange:hover {
+      background: var(--orange-hover);
     }
     .bulk-btn-green {
-      background: var(--green);
-      color: #ffffff;
+      background: var(--green-soft);
+      color: var(--green-text);
+      border: 1px solid #bbf7d0;
+    }
+    .bulk-btn-green:hover {
+      background: #bbf7d0;
     }
 
+    /* 3-колоночная сетка карточек (3:4 постеры) */
     .poster-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
       gap: 8px;
     }
 
-    .empty-state {
-      border-radius: 14px;
-      border: 1.5px dashed var(--border-strong);
-      background: rgba(255, 255, 255, 0.7);
-      padding: 18px 14px;
-      text-align: center;
-      font-size: 12.5px;
-      font-weight: 600;
-      color: var(--text-secondary);
-    }
-
-    .laundry-all-empty {
-      margin: 26px 4px 0;
-      padding: 30px 20px;
-      border-radius: 20px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      box-shadow: var(--shadow-sm);
-      text-align: center;
-    }
-
-    .empty-check-circle {
-      width: 52px;
-      height: 52px;
-      margin: 0 auto 12px;
-      border-radius: 16px;
-      background: var(--green-soft);
-      color: var(--green);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .swipe-hint {
-      padding: 4px 0 12px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 6px;
-      font-size: 11.5px;
-      font-weight: 600;
-      color: var(--text-tertiary);
-    }
-
-    /* ===================== 5. КАРТОЧКА ОДЕЖДЫ (ПОСТЕР 3:4) ===================== */
-    .poster-card,
-    .poster-media,
-    .poster-img {
-      -webkit-touch-callout: none;
-      -webkit-user-select: none;
-      user-select: none;
-      -webkit-user-drag: none;
-    }
-
     .poster-card {
-      position: relative;
       background: var(--surface);
-      border-radius: var(--radius-card);
       border: 1px solid var(--border);
-      box-shadow: var(--shadow-xs);
+      border-radius: var(--radius-card);
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      animation: cardFadeIn 0.16s ease-out both;
+      box-shadow: var(--shadow-xs);
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
-
     .poster-card.edit-active {
       border-color: #93c5fd;
-      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.14);
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.14);
     }
 
     .poster-media {
       position: relative;
       width: 100%;
       aspect-ratio: 3 / 4;
-      background: #f9fafb;
+      background: var(--surface-soft);
       overflow: hidden;
       cursor: pointer;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     .poster-img {
@@ -585,6 +569,10 @@
       height: 100%;
       object-fit: cover;
       display: block;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-user-drag: none;
       pointer-events: none;
     }
 
@@ -593,15 +581,15 @@
       left: 5px;
       right: 5px;
       bottom: 5px;
-      padding: 2px 6px;
-      border-radius: 6px;
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
-      border: 1px solid rgba(17, 24, 39, 0.06);
-      font-size: 10px;
+      padding: 3px 6px;
+      border-radius: 7px;
+      background: rgba(17, 24, 39, 0.66);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      color: #ffffff;
+      font-size: 10.5px;
       font-weight: 600;
-      color: var(--text);
+      line-height: 1.25;
       text-align: center;
       white-space: nowrap;
       overflow: hidden;
@@ -609,25 +597,26 @@
       pointer-events: none;
     }
 
+    /* Кнопка редактирования ✎ в левом верхнем углу */
     .card-edit-overlay-btn {
       position: absolute;
       top: 6px;
       left: 6px;
-      z-index: 5;
+      z-index: 6;
       width: 28px;
       height: 28px;
       border-radius: 9px;
-      background: rgba(255, 255, 255, 0.94);
-      border: 1px solid #93c5fd;
-      color: var(--blue);
+      background: rgba(37, 99, 235, 0.94);
+      color: #ffffff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 13.5px;
+      font-size: 13px;
       font-weight: 700;
-      box-shadow: 0 2px 8px rgba(17, 24, 39, 0.14);
+      box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
     }
 
+    /* Кнопка возврата в шкаф ↩ в правом верхнем углу */
     .card-undo-top-btn {
       position: absolute;
       top: 6px;
@@ -647,20 +636,51 @@
       box-shadow: 0 2px 6px rgba(17, 24, 39, 0.12);
     }
 
+    /* Полупрозрачные бейджи на углах фото */
+    .poster-badge {
+      position: absolute;
+      top: 6px;
+      z-index: 4;
+      padding: 2px 6px;
+      border-radius: 7px;
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.35;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      pointer-events: none;
+      letter-spacing: -0.01em;
+    }
+    .poster-badge-tl { left: 6px; }
+    .poster-badge-tr { right: 6px; }
+
+    .poster-badge-days {
+      background: rgba(17, 24, 39, 0.76);
+      color: #ffffff;
+    }
+    .poster-badge-dirty {
+      background: rgba(239, 68, 68, 0.88);
+      color: #ffffff;
+    }
+    .poster-badge-dirty-today {
+      background: rgba(234, 88, 12, 0.88);
+      color: #ffffff;
+    }
+    .poster-badge-multi {
+      background: rgba(255, 255, 255, 0.9);
+      color: #1f2937;
+      border: 1px solid rgba(17, 24, 39, 0.12);
+      box-shadow: 0 1px 3px rgba(17, 24, 39, 0.08);
+    }
+
     .poster-footer {
       padding: 6px;
       background: var(--surface);
-      border-top: 1px solid #f3f4f6;
-      display: flex;
-      align-items: center;
-      gap: 4px;
     }
 
     .card-btn {
-      flex: 1;
-      min-width: 0;
+      width: 100%;
       height: 31px;
-      padding: 0 4px;
       border-radius: 9px;
       font-size: 11.5px;
       font-weight: 700;
@@ -669,7 +689,6 @@
       justify-content: center;
       white-space: nowrap;
     }
-
     .card-btn-green {
       background: var(--green);
       color: #ffffff;
@@ -677,7 +696,6 @@
     .card-btn-green:hover {
       background: var(--green-hover);
     }
-
     .card-btn-orange {
       background: var(--orange);
       color: #ffffff;
@@ -685,7 +703,6 @@
     .card-btn-orange:hover {
       background: var(--orange-hover);
     }
-
     .card-btn-blue {
       background: var(--blue);
       color: #ffffff;
@@ -693,27 +710,64 @@
     .card-btn-blue:hover {
       background: var(--blue-hover);
     }
-
-    /* Кнопки смены цвета в 1 тап в режиме правки */
     .card-btn-to-dark {
-      background: #1f2937;
+      background: #111827;
       color: #ffffff;
-      font-size: 11px;
     }
     .card-btn-to-light {
       background: #f3f4f6;
       color: #111827;
-      border: 1px solid #d1d5db;
-      font-size: 11px;
+      border: 1px solid var(--border-strong);
     }
 
-    /* ===================== 6. ПЛАВАЮЩИЙ TOAST С UNDO ===================== */
+    .empty-state {
+      padding: 18px 12px;
+      border-radius: 14px;
+      border: 1px dashed var(--border-strong);
+      background: rgba(255, 255, 255, 0.6);
+      text-align: center;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .laundry-all-empty {
+      margin: 28px 6px 18px;
+      padding: 28px 18px;
+      border-radius: 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .empty-check-circle {
+      width: 52px;
+      height: 52px;
+      margin: 0 auto 12px;
+      border-radius: 999px;
+      background: var(--green-soft);
+      color: var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .swipe-hint {
+      margin-top: 8px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-tertiary);
+    }
+
+    /* ===================== 7. ПЛАВАЮЩИЙ TOAST С UNDO (3.5с) ===================== */
     .toast-wrap {
       position: absolute;
       left: 12px;
       right: 12px;
       bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
-      z-index: 70;
+      z-index: 45;
       pointer-events: none;
       display: flex;
       justify-content: center;
@@ -721,92 +775,99 @@
 
     .toast-box {
       pointer-events: auto;
-      width: 100%;
-      max-width: 410px;
-      padding: 11px 14px;
+      max-width: 100%;
+      padding: 10px 14px;
       border-radius: 14px;
       background: #111827;
       color: #ffffff;
-      box-shadow: 0 12px 30px rgba(17, 24, 39, 0.25);
-      display: flex;
+      box-shadow: 0 12px 30px rgba(17, 24, 39, 0.28);
+      display: inline-flex;
       align-items: center;
-      justify-content: space-between;
       gap: 12px;
-      animation: slideUp 0.18s ease-out both;
+      animation: toastIn 0.18s ease-out;
     }
 
     .toast-msg {
-      font-size: 12.5px;
+      font-size: 13px;
       font-weight: 600;
       line-height: 1.3;
     }
 
     .toast-undo {
       flex-shrink: 0;
-      padding: 6px 11px;
+      padding: 5px 10px;
       border-radius: 8px;
       background: rgba(255, 255, 255, 0.16);
-      color: #ffffff;
+      color: #fde047;
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 800;
     }
     .toast-undo:hover {
-      background: rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.24);
     }
 
-    /* ===================== 7. МОДАЛЬНЫЕ ОКНА И ШТОРКИ ===================== */
+    /* ===================== 8. МОДАЛЬНЫЕ ОКНА И ФОРМЫ ===================== */
     .modal-overlay {
-      position: absolute;
+      position: fixed;
       inset: 0;
       z-index: 60;
-      background: rgba(17, 24, 39, 0.45);
+      background: rgba(17, 24, 39, 0.48);
       backdrop-filter: blur(4px);
       -webkit-backdrop-filter: blur(4px);
       display: flex;
       align-items: flex-end;
       justify-content: center;
-      padding: 10px 10px calc(env(safe-area-inset-bottom, 0px) + 10px);
-      animation: fadeIn 0.15s ease-out both;
+      padding: 0;
     }
 
     @media (min-width: 560px) {
       .modal-overlay {
         align-items: center;
+        padding: 16px;
       }
     }
 
     .modal-sheet {
       width: 100%;
-      max-width: 440px;
-      max-height: 92%;
+      max-width: 460px;
+      max-height: 90vh;
+      max-height: 90dvh;
       overflow-y: auto;
       background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sheet);
+      border-radius: var(--radius-sheet) var(--radius-sheet) 0 0;
       box-shadow: var(--shadow-sheet);
-      padding: 18px;
-      animation: slideUp 0.2s cubic-bezier(0.22, 1, 0.36, 1) both;
+      padding: 18px 16px calc(env(safe-area-inset-bottom, 0px) + 22px);
+      animation: sheetUp 0.2s ease-out;
+    }
+
+    @media (min-width: 560px) {
+      .modal-sheet {
+        border-radius: var(--radius-sheet);
+        padding: 20px 18px 22px;
+      }
     }
 
     .modal-head {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
-      gap: 10px;
+      gap: 12px;
       margin-bottom: 16px;
     }
 
     .modal-title {
       margin: 0;
-      font-size: 17px;
+      font-size: 18px;
       font-weight: 800;
       color: var(--text);
+      letter-spacing: -0.015em;
     }
 
     .modal-subtitle {
-      margin: 2px 0 0;
+      margin: 3px 0 0;
       font-size: 12px;
       color: var(--text-secondary);
+      line-height: 1.35;
     }
 
     .modal-close {
@@ -821,7 +882,7 @@
       justify-content: center;
     }
     .modal-close:hover {
-      background: #e5e7eb;
+      background: var(--border);
       color: var(--text);
     }
 
@@ -831,132 +892,6 @@
       gap: 14px;
     }
 
-    .field-label {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      color: var(--text-secondary);
-    }
-
-    /* Зона загрузки фото (3:4 компактная по центру) */
-    .photo-dropzone {
-      position: relative;
-      display: block;
-      width: 100%;
-      max-width: 210px;
-      margin: 0 auto;
-      aspect-ratio: 3 / 4;
-      border-radius: 16px;
-      border: 1.5px dashed var(--border-strong);
-      background: var(--surface-soft);
-      overflow: hidden;
-      cursor: pointer;
-    }
-    .photo-dropzone.has-error {
-      border-color: var(--red);
-      background: #fef2f2;
-    }
-
-    .photo-empty-box {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: 14px;
-    }
-
-    .camera-badge {
-      width: 48px;
-      height: 48px;
-      border-radius: 14px;
-      background: var(--blue-soft);
-      color: var(--blue);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 10px;
-    }
-
-    .photo-preview {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      display: block;
-      -webkit-touch-callout: none;
-      user-select: none;
-      -webkit-user-select: none;
-      -webkit-user-drag: none;
-    }
-
-    .photo-pill-bottom {
-      position: absolute;
-      left: 8px;
-      right: 8px;
-      bottom: 8px;
-      padding: 4px 8px;
-      border-radius: 8px;
-      background: rgba(17, 24, 39, 0.78);
-      font-size: 10.5px;
-      font-weight: 600;
-      color: #ffffff;
-      text-align: center;
-    }
-
-    .photo-pill-top {
-      position: absolute;
-      right: 8px;
-      top: 8px;
-      padding: 4px 9px;
-      border-radius: 8px;
-      background: rgba(255, 255, 255, 0.94);
-      border: 1px solid var(--border);
-      font-size: 11px;
-      font-weight: 700;
-      color: var(--text);
-      box-shadow: var(--shadow-xs);
-    }
-
-    /* Палитра цветной карточки (6 свотчей) */
-    .stub-section {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 14px;
-      background: var(--surface-soft);
-      border: 1px solid var(--border);
-    }
-
-    .stub-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .stub-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 8px;
-    }
-
-    .stub-dot-btn {
-      width: 100%;
-      aspect-ratio: 1 / 1;
-      border-radius: 10px;
-      border: 2px solid rgba(17, 24, 39, 0.12);
-    }
-    .stub-dot-btn.selected {
-      border-color: var(--blue);
-      box-shadow: 0 0 0 2px #ffffff, 0 0 0 4px var(--blue);
-    }
-
-    /* Кнопки выбора цвета и статуса */
     .grid-2 {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -965,92 +900,63 @@
 
     .grid-3 {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 6px;
     }
 
-    .choice-btn {
-      height: 42px;
-      padding: 0 10px;
-      border-radius: 12px;
-      border: 1.5px solid var(--border);
-      background: var(--surface-soft);
-      color: var(--text-secondary);
-      font-size: 13px;
+    .field-label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 12px;
       font-weight: 700;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 7px;
-    }
-    .choice-btn.active-light {
-      border-color: #d97706;
-      background: #fffbeb;
-      color: var(--text);
-    }
-    .choice-btn.active-dark {
-      border-color: var(--text);
-      background: #111827;
-      color: #ffffff;
+      color: #374151;
     }
 
-    .status-btn {
-      height: 38px;
-      padding: 0 6px;
-      border-radius: 10px;
-      border: 1.5px solid var(--border);
-      background: var(--surface-soft);
-      color: var(--text-secondary);
+    .field-hint {
+      margin: 6px 2px 0;
       font-size: 11.5px;
-      font-weight: 700;
-    }
-    .status-btn.active {
-      border-color: var(--blue);
-      background: #eff6ff;
-      color: var(--blue-text);
+      color: var(--text-secondary);
+      line-height: 1.38;
     }
 
-    .text-input,
-    .time-input {
+    .text-input, .time-input {
       width: 100%;
       height: 44px;
-      padding: 0 13px;
+      padding: 0 12px;
       border-radius: 12px;
-      border: 1.5px solid var(--border);
+      border: 1px solid var(--border-strong);
       background: var(--surface);
-      color: var(--text);
       font-size: 14px;
-      font-weight: 600;
+      font-weight: 500;
+      color: var(--text);
       outline: none;
     }
-    .text-input:focus,
-    .time-input:focus {
+    .text-input:focus, .time-input:focus {
       border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
     }
 
     .time-input {
-      font-size: 16px;
       font-weight: 700;
       text-align: center;
     }
 
-    /* Кнопки действий */
     .btn {
-      height: 42px;
+      width: 100%;
+      height: 44px;
       padding: 0 14px;
       border-radius: 12px;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 700;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 7px;
-      width: 100%;
+      gap: 6px;
+      text-align: center;
     }
     .btn-sm {
-      height: 36px;
-      font-size: 12px;
+      height: 38px;
+      font-size: 13px;
       border-radius: 10px;
     }
     .btn-primary {
@@ -1064,6 +970,9 @@
       background: var(--green);
       color: #ffffff;
     }
+    .btn-green:hover {
+      background: var(--green-hover);
+    }
     .btn-blue {
       background: var(--blue);
       color: #ffffff;
@@ -1073,49 +982,194 @@
     }
     .btn-surface {
       background: var(--surface);
-      border: 1px solid var(--border-strong);
       color: var(--text);
-      box-shadow: var(--shadow-xs);
+      border: 1px solid var(--border-strong);
     }
     .btn-surface:hover {
       background: var(--surface-soft);
     }
     .btn-red-soft {
       background: var(--red-soft);
-      border: 1px solid var(--red-border);
       color: var(--red-text);
+      border: 1px solid var(--red-border);
     }
     .btn-red-solid {
-      background: var(--red);
+      background: var(--red-dark);
       color: #ffffff;
     }
     .btn-amber-soft {
       background: var(--amber-soft);
-      border: 1px solid var(--amber-border);
       color: var(--amber-text);
+      border: 1px solid var(--amber-border);
+    }
+
+    /* Выбор фото */
+    .photo-dropzone {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      max-width: 190px;
+      aspect-ratio: 3 / 4;
+      margin: 0 auto;
+      border-radius: 16px;
+      border: 2px dashed var(--border-strong);
+      background: var(--surface-soft);
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .photo-dropzone.has-error {
+      border-color: var(--red);
+      background: var(--red-soft);
+    }
+
+    .photo-empty-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 16px;
+    }
+
+    .camera-badge {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 10px;
+      border-radius: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-xs);
+    }
+
+    .photo-preview {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .photo-pill-top, .photo-pill-bottom {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(17, 24, 39, 0.78);
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    .photo-pill-top { top: 8px; }
+    .photo-pill-bottom { bottom: 8px; }
+
+    .stub-section {
+      margin-top: 10px;
+    }
+
+    .stub-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .stub-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+    }
+
+    .stub-dot-btn {
+      width: 100%;
+      aspect-ratio: 1;
+      border-radius: 11px;
+      border: 2px solid var(--border-strong);
+      box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.65);
+    }
+    .stub-dot-btn.selected {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25);
+    }
+
+    .choice-btn {
+      height: 42px;
+      padding: 0 10px;
+      border-radius: 12px;
+      border: 1.5px solid var(--border-strong);
+      background: var(--surface);
+      font-size: 13px;
+      font-weight: 700;
+      color: #374151;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .choice-btn.active-light {
+      border-color: #d97706;
+      background: #fffbeb;
+      color: #92400e;
+    }
+    .choice-btn.active-dark {
+      border-color: var(--text);
+      background: #111827;
+      color: #ffffff;
+    }
+    .choice-btn.active-mode {
+      border-color: var(--blue);
+      background: #eff6ff;
+      color: var(--blue-text);
+    }
+
+    .status-btn {
+      height: 38px;
+      border-radius: 10px;
+      border: 1.5px solid var(--border-strong);
+      background: var(--surface);
+      font-size: 12.5px;
+      font-weight: 700;
+      color: #374151;
+    }
+    .status-btn.active {
+      border-color: var(--blue);
+      background: #eff6ff;
+      color: var(--blue-text);
+    }
+
+    .inline-confirm-box, .warn-confirm-box {
+      padding: 12px;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .inline-confirm-box {
+      background: var(--red-soft);
+      border: 1px solid var(--red-border);
+    }
+    .warn-confirm-box {
+      background: var(--amber-soft);
+      border: 1px solid var(--amber-border);
     }
 
     .error-msg {
       margin: 6px 0 0;
       font-size: 12px;
       font-weight: 600;
-      color: var(--red);
+      color: var(--red-dark);
       line-height: 1.35;
     }
 
-    .inline-confirm-box {
-      padding: 11px;
-      border-radius: 12px;
-      background: #fef2f2;
-      border: 1px solid var(--red-border);
-      display: flex;
-      flex-direction: column;
-      gap: 9px;
-    }
-
-    /* ===================== 8. СЕКЦИИ ОКНА «ЗАЩИТА И ДАННЫЕ» ===================== */
+    /* ===================== 9. СЕКЦИИ ОКНА «ЗАЩИТА И ДАННЫЕ» ===================== */
     .shield-section {
-      padding: 14px;
+      padding: 13px;
       border-radius: 16px;
       background: var(--surface-soft);
       border: 1px solid var(--border);
@@ -1133,38 +1187,51 @@
 
     .sec-title {
       margin: 0;
-      font-size: 13.5px;
+      font-size: 14px;
       font-weight: 800;
       color: var(--text);
     }
 
     .sec-desc {
       margin: 3px 0 0;
-      font-size: 11.5px;
+      font-size: 12px;
       color: var(--text-secondary);
-      line-height: 1.4;
+      line-height: 1.38;
     }
 
     .pill {
       flex-shrink: 0;
-      padding: 3px 8px;
-      border-radius: 7px;
-      font-size: 10.5px;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 11px;
       font-weight: 700;
       background: #e5e7eb;
-      color: #4b5563;
+      color: #374151;
     }
     .pill-green {
       background: var(--green-soft);
       color: var(--green-text);
     }
+    .pill-amber {
+      background: var(--amber-soft);
+      color: var(--amber-text);
+    }
     .pill-blue {
       background: var(--blue-soft);
       color: var(--blue-text);
     }
-    .pill-amber {
-      background: var(--amber-soft);
-      color: var(--amber-text);
+
+    .meta-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      padding: 2px 0;
+    }
+    .meta-row strong {
+      color: var(--text);
+      font-weight: 700;
     }
 
     .info-box {
@@ -1172,8 +1239,8 @@
       border-radius: 11px;
       background: #eff6ff;
       border: 1px solid #bfdbfe;
-      font-size: 11.5px;
-      color: #1e3a8a;
+      color: #1e40af;
+      font-size: 12px;
       line-height: 1.42;
     }
 
@@ -1182,41 +1249,17 @@
       border-radius: 11px;
       background: var(--amber-soft);
       border: 1px solid var(--amber-border);
-      font-size: 11.5px;
       color: var(--amber-text);
+      font-size: 12px;
       line-height: 1.42;
     }
 
-    .warn-confirm-box {
-      padding: 11px;
-      border-radius: 12px;
-      background: var(--amber-soft);
-      border: 1px solid var(--amber-border);
-      display: flex;
-      flex-direction: column;
-      gap: 9px;
-    }
-
-    .meta-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-    .meta-row strong {
-      color: var(--text);
-      font-weight: 700;
-    }
-
-    /* Тумблер включения уведомлений (iOS-стиль) */
     .switch-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 10px;
-      padding: 10px 12px;
+      padding: 9px 11px;
       border-radius: 12px;
       background: var(--surface);
       border: 1px solid var(--border);
@@ -1235,11 +1278,12 @@
       flex-shrink: 0;
       border-radius: 999px;
       background: #d1d5db;
-      transition: background-color 0.18s ease;
+      transition: background-color 0.2s ease;
     }
     .toggle-switch.on {
       background: var(--green);
     }
+
     .toggle-knob {
       position: absolute;
       top: 3px;
@@ -1248,8 +1292,8 @@
       height: 22px;
       border-radius: 999px;
       background: #ffffff;
-      box-shadow: 0 2px 5px rgba(17, 24, 39, 0.22);
-      transition: transform 0.18s ease;
+      box-shadow: 0 1px 3px rgba(17, 24, 39, 0.28);
+      transition: transform 0.2s ease;
     }
     .toggle-switch.on .toggle-knob {
       transform: translateX(20px);
@@ -1260,32 +1304,24 @@
       font-weight: 600;
       color: var(--text-secondary);
       line-height: 1.38;
-      min-height: 17px;
     }
-    .push-status-line.ok {
-      color: var(--green-text);
-    }
-    .push-status-line.info {
-      color: var(--blue-text);
-    }
-    .push-status-line.err {
-      color: var(--red);
-    }
+    .push-status-line.ok { color: var(--green-text); }
+    .push-status-line.err { color: var(--red-dark); }
+    .push-status-line.info { color: var(--blue-text); }
 
-    /* ===================== 9. ПОЛНОЭКРАННЫЙ LIGHTBOX ===================== */
+    /* ===================== 10. LIGHTBOX ПРОСМОТР ФОТО ===================== */
     .lightbox-overlay {
-      position: absolute;
+      position: fixed;
       inset: 0;
       z-index: 80;
-      background: rgba(17, 24, 39, 0.88);
+      background: rgba(17, 24, 39, 0.92);
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 20px;
-      animation: fadeIn 0.15s ease-out both;
+      padding: 24px 16px;
     }
 
     .lightbox-close {
@@ -1297,22 +1333,21 @@
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.16);
       color: #ffffff;
-      display: inline-flex;
+      display: flex;
       align-items: center;
       justify-content: center;
     }
 
     .lightbox-img {
-      max-width: 100%;
-      max-height: 70%;
+      max-width: min(92vw, 420px);
+      max-height: 68vh;
       border-radius: 18px;
-      background: #ffffff;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
       object-fit: contain;
+      background: #ffffff;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
       -webkit-touch-callout: none;
-      user-select: none;
       -webkit-user-select: none;
-      -webkit-user-drag: none;
+      user-select: none;
     }
 
     .lightbox-caption {
@@ -1323,8 +1358,15 @@
       text-align: center;
     }
 
+    .lightbox-tags {
+      margin-top: 10px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 6px;
+    }
+
     .lightbox-pill {
-      margin-top: 8px;
       padding: 4px 12px;
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.16);
@@ -1333,72 +1375,72 @@
       font-weight: 600;
     }
 
-    /* ===================== 10. ЭКРАН ВВОДА PIN-КОДА (СВЕТЛЫЙ iOS) ===================== */
+    /* ===================== 11. ЭКРАН ВВОДА PIN-КОДА (СВЕТЛЫЙ iOS) ===================== */
     .pin-overlay {
-      position: absolute;
+      position: fixed;
       inset: 0;
-      z-index: 95;
-      background: var(--surface);
-      color: var(--text);
+      z-index: 90;
+      background: var(--bg);
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      padding: calc(env(safe-area-inset-top, 0px) + 16px) 24px calc(env(safe-area-inset-bottom, 0px) + 26px);
-      animation: fadeIn 0.15s ease-out both;
+      align-items: center;
+      padding: calc(env(safe-area-inset-top, 0px) + 14px) 20px calc(env(safe-area-inset-bottom, 0px) + 28px);
     }
 
     .pin-top {
+      width: 100%;
+      max-width: 360px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      min-height: 36px;
+      min-height: 38px;
     }
 
     .pin-center {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       text-align: center;
-      margin-top: 8px;
+      width: 100%;
+      max-width: 320px;
     }
 
     .pin-icon {
-      width: 54px;
-      height: 54px;
-      border-radius: 16px;
-      background: var(--surface-muted);
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 14px;
+      border-radius: 18px;
+      background: var(--surface);
       border: 1px solid var(--border);
       color: var(--text);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 14px;
+      box-shadow: var(--shadow-sm);
     }
 
     .pin-dots {
+      margin-top: 22px;
       display: flex;
+      justify-content: center;
       gap: 16px;
-      margin-top: 20px;
     }
 
     .pin-dot {
-      width: 14px;
-      height: 14px;
+      width: 15px;
+      height: 15px;
       border-radius: 999px;
-      border: 2px solid #9ca3af;
+      border: 2px solid var(--border-strong);
       background: transparent;
-      transition: background-color 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
+      transition: background-color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
     }
     .pin-dot.filled {
       background: var(--text);
       border-color: var(--text);
-      transform: scale(1.1);
+      transform: scale(1.08);
     }
 
     .pin-keypad {
       width: 100%;
       max-width: 280px;
-      margin: 0 auto;
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 14px;
@@ -1407,35 +1449,32 @@
     .pin-key {
       height: 64px;
       border-radius: 999px;
-      background: var(--surface-muted);
+      background: var(--surface);
       border: 1px solid var(--border);
       font-size: 24px;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--text);
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: var(--shadow-xs);
     }
     .pin-key:hover {
-      background: #e5e7eb;
+      background: var(--surface-soft);
     }
 
-    /* ===================== АНИМАЦИИ ===================== */
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(16px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes cardFadeIn {
-      from { opacity: 0; transform: scale(0.97); }
-      to { opacity: 1; transform: scale(1); }
-    }
+    /* ===================== 12. АНИМАЦИИ ===================== */
     @keyframes pulseSoft {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.4; }
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.45; transform: scale(0.85); }
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(10px) scale(0.97); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes sheetUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     @keyframes shakeX {
       0%, 100% { transform: translateX(0); }
@@ -1453,16 +1492,16 @@
     <!-- ===================== 1. ВЕРХНЯЯ ЛИПКАЯ ШАПКА ===================== -->
     <header class="app-header">
       <div class="header-row">
-        <!-- Слева: Защита и данные -->
+        <!-- Левая кнопка: Защита и данные -->
         <button id="shieldBtn" type="button" class="header-icon-btn shield-btn" aria-label="Защита и данные" title="Защита и данные">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v5c0 5-3.5 9.2-7 10.5C8.5 20.2 5 16 5 11V6l7-3z" />
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 12.2l1.7 1.7 3.5-3.6" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 4v5c0 5-3.5 8.5-7 9.5-3.5-1-7-4.5-7-9.5V7l7-4z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 12l1.8 1.8 3.7-3.8" />
           </svg>
           <span id="shieldDot" class="shield-dot hidden" aria-hidden="true"></span>
         </button>
 
-        <!-- По центру: 2 вкладки -->
+        <!-- Центр: Сегментированный переключатель вкладок -->
         <div class="tabs-track" role="tablist" aria-label="Разделы гардероба">
           <div id="tabsPill" class="tabs-pill" aria-hidden="true"></div>
           <div class="tabs-grid">
@@ -1477,7 +1516,7 @@
           </div>
         </div>
 
-        <!-- Справа: Добавить вещь (+) -->
+        <!-- Правая кнопка: Добавить вещь -->
         <button id="addBtn" type="button" class="header-icon-btn add-btn" aria-label="Добавить вещь" title="Добавить вещь">
           <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
@@ -1487,40 +1526,60 @@
     </header>
 
     <!-- ===================== 2. БАННЕР РЕЖИМА ПРАВКИ ===================== -->
-    <div id="editBanner" class="edit-banner hidden" role="status">
+    <div id="editBanner" class="edit-banner hidden">
       <div class="edit-banner-left">
         <span class="pulse-dot" aria-hidden="true"></span>
-        <p class="edit-banner-text">Режим правки: смена цвета в 1 тап или ✎ для деталей</p>
+        <p class="edit-banner-text">Режим правки: меняйте цвет в 1 тап или нажмите ✎ для редактирования</p>
       </div>
       <button id="editDoneBtn" type="button" class="edit-done-btn">Готово</button>
     </div>
 
-    <!-- ===================== 3. ОСНОВНОЙ СВАЙП-КОНТЕЙНЕР ===================== -->
+    <!-- ===================== 3. ГОРИЗОНТАЛЬНЫЙ СВАЙП-ПЕЙДЖЕР ===================== -->
     <main id="snapContainer" class="snap-container no-scrollbar">
 
-      <!-- ========== ЭКРАН 1: ЧИСТОЕ ========== -->
+      <!-- ========== ВКЛАДКА 1: ЧИСТОЕ ========== -->
       <section id="cleanPane" class="snap-pane no-scrollbar" aria-label="Чистое">
 
-        <!-- Блок «На мне сегодня» (скрыт, если нет вещей со статусом worn) -->
+        <!-- Верхний активный блок (виден, если есть хотя бы 1 вещь со статусом wearing) -->
         <div id="wearingPanel" class="wearing-panel hidden">
-          <div class="section-header" style="margin-bottom: 10px;">
-            <div class="section-title-group">
-              <span class="pulse-dot" style="background: var(--orange);" aria-hidden="true"></span>
-              <h2 class="section-title">На мне сегодня</h2>
-              <span id="wearingCount" class="section-count">0</span>
+          <!-- Подсекция A: «На сегодня» (однодневные вещи) -->
+          <div id="todaySection" class="wearing-subsection hidden">
+            <div class="section-header" style="margin-bottom: 10px;">
+              <div class="section-title-group">
+                <span class="pulse-dot" style="background: var(--orange);" aria-hidden="true"></span>
+                <h2 class="section-title">На сегодня</h2>
+                <span id="todayCount" class="section-count">0</span>
+              </div>
+              <button id="todayToLaundryBtn" type="button" class="bulk-btn bulk-btn-orange">
+                В стирку (0)
+              </button>
             </div>
-            <button id="allWearingToLaundryBtn" type="button" class="bulk-btn bulk-btn-orange">
-              Всё в стирку
-            </button>
+
+            <!-- Утреннее напоминание (строго только для однодневных вещей, выбранных вчера или ранее) -->
+            <div id="morningNudge" class="morning-nudge hidden">
+              <p class="morning-nudge-text">Выбрано вчера — отправить в стирку?</p>
+              <button id="morningNudgeBtn" type="button" class="morning-nudge-btn">В стирку</button>
+            </div>
+
+            <div id="todayGrid" class="poster-grid"></div>
           </div>
 
-          <!-- Утреннее напоминание, если вещь была выбрана в предыдущий день -->
-          <div id="morningNudge" class="morning-nudge hidden">
-            <p class="morning-nudge-text">Выбрано вчера — отправить в стирку?</p>
-            <button id="morningNudgeBtn" type="button" class="morning-nudge-btn">Отправить</button>
-          </div>
+          <!-- Тонкий разделитель (виден, если заполнены обе подсекции) -->
+          <div id="wearingDivider" class="wearing-divider hidden" aria-hidden="true"></div>
 
-          <div id="wearingGrid" class="poster-grid"></div>
+          <!-- Подсекция B: «В носке» (многодневные вещи: худи, свитера, штаны) -->
+          <div id="inUseSection" class="wearing-subsection hidden">
+            <div class="section-header" style="margin-bottom: 9px;">
+              <div class="section-title-group">
+                <span class="pulse-dot" style="background: var(--blue); animation: none;" aria-hidden="true"></span>
+                <h2 class="section-title">В носке</h2>
+                <span id="inUseCount" class="section-count">0</span>
+              </div>
+              <span class="subsection-caption">Не сбрасывается вечером</span>
+            </div>
+
+            <div id="inUseGrid" class="poster-grid"></div>
+          </div>
         </div>
 
         <!-- Секция «Светлое» (Чистое) -->
@@ -1558,12 +1617,10 @@
           <div id="cleanDarkEmpty" class="empty-state hidden">Чистых тёмных вещей пока нет</div>
         </div>
 
-        <div class="swipe-hint">
-          <span>Свайп влево → «В стирке»</span>
-        </div>
+        <div class="swipe-hint">Свайп влево → «В стирке»</div>
       </section>
 
-      <!-- ========== ЭКРАН 2: В СТИРКЕ ========== -->
+      <!-- ========== ВКЛАДКА 2: В СТИРКЕ ========== -->
       <section id="laundryPane" class="snap-pane no-scrollbar" aria-label="В стирке">
 
         <div id="laundryAllEmpty" class="laundry-all-empty hidden">
@@ -1579,7 +1636,7 @@
         </div>
 
         <div id="laundrySections">
-          <!-- Секция «Светлое» (В стирке) -->
+          <!-- Секция «Светлое» (В стирке, сортировка: сначала давние) -->
           <div class="section-block">
             <div class="section-header">
               <div class="section-title-group">
@@ -1591,6 +1648,7 @@
                 </span>
                 <h2 class="section-title">Светлое</h2>
                 <span id="laundryLightCount" class="section-count">0</span>
+                <span class="sort-hint">Сначала давние</span>
               </div>
               <button id="washAllLightBtn" type="button" class="bulk-btn bulk-btn-green hidden">
                 Постирано
@@ -1600,7 +1658,7 @@
             <div id="laundryLightEmpty" class="empty-state hidden">Светлых вещей в стирке нет</div>
           </div>
 
-          <!-- Секция «Тёмное» (В стирке) -->
+          <!-- Секция «Тёмное» (В стирке, сортировка: сначала давние) -->
           <div class="section-block">
             <div class="section-header">
               <div class="section-title-group">
@@ -1611,6 +1669,7 @@
                 </span>
                 <h2 class="section-title">Тёмное</h2>
                 <span id="laundryDarkCount" class="section-count">0</span>
+                <span class="sort-hint">Сначала давние</span>
               </div>
               <button id="washAllDarkBtn" type="button" class="bulk-btn bulk-btn-green hidden">
                 Постирано
@@ -1621,14 +1680,12 @@
           </div>
         </div>
 
-        <div class="swipe-hint">
-          <span>← Свайп вправо — вернуться в «Чистое»</span>
-        </div>
+        <div class="swipe-hint">← Свайп вправо — вернуться в «Чистое»</div>
       </section>
 
     </main>
 
-    <!-- ===================== ПЛАВАЮЩИЙ TOAST С UNDO (3.5с) ===================== -->
+    <!-- ===================== 4. ПЛАВАЮЩИЙ TOAST С UNDO (3.5с) ===================== -->
     <div class="toast-wrap">
       <div id="toastBox" class="toast-box hidden" role="status" aria-live="polite">
         <span id="toastMsg" class="toast-msg">Готово</span>
@@ -1636,7 +1693,7 @@
       </div>
     </div>
 
-    <!-- ===================== МОДАЛКА: ДОБАВИТЬ / РЕДАКТИРОВАТЬ ВЕЩЬ ===================== -->
+    <!-- ===================== 5. МОДАЛКА: ДОБАВИТЬ / РЕДАКТИРОВАТЬ ВЕЩЬ ===================== -->
     <div id="itemModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="itemModalTitle">
       <div class="modal-sheet no-scrollbar">
         <div class="modal-head">
@@ -1685,33 +1742,38 @@
           <div>
             <span class="field-label">Цвет для стирки</span>
             <div class="grid-2">
-              <button type="button" id="itemCatLightBtn" class="choice-btn active-light">
-                <span>Светлое</span>
-              </button>
-              <button type="button" id="itemCatDarkBtn" class="choice-btn">
-                <span>Тёмное</span>
-              </button>
+              <button type="button" id="itemCatLightBtn" class="choice-btn active-light">Светлое</button>
+              <button type="button" id="itemCatDarkBtn" class="choice-btn">Тёмное</button>
             </div>
           </div>
 
-          <!-- Статус (только в режиме редактирования) -->
+          <div>
+            <span class="field-label">Режим носки</span>
+            <div class="grid-2">
+              <button type="button" id="itemModeSingleBtn" class="choice-btn active-mode">На 1 день</button>
+              <button type="button" id="itemModeMultiBtn" class="choice-btn">На несколько дней</button>
+            </div>
+            <p class="field-hint">Худи, свитера, штаны — остаются в «В носке» при вечернем сбросе</p>
+          </div>
+
+          <!-- Статус (показывается только при редактировании ✎) -->
           <div id="itemStatusGroup" class="hidden">
             <span class="field-label">Статус</span>
             <div class="grid-3">
               <button type="button" data-item-status="clean" class="status-btn">Чистое</button>
-              <button type="button" data-item-status="worn" class="status-btn">На мне</button>
+              <button type="button" data-item-status="wearing" class="status-btn">На мне</button>
               <button type="button" data-item-status="laundry" class="status-btn">В стирке</button>
             </div>
           </div>
 
           <div>
             <label for="itemNameInput" class="field-label">Название (необязательно)</label>
-            <input id="itemNameInput" type="text" maxlength="32" placeholder="Например: Белая футболка" class="text-input" />
+            <input id="itemNameInput" type="text" maxlength="32" placeholder="Например: Чёрное худи" class="text-input" />
           </div>
 
           <button id="itemSubmitBtn" type="submit" class="btn btn-primary">Добавить вещь</button>
 
-          <!-- Удаление вещи (только в режиме редактирования, со встроенным подтверждением) -->
+          <!-- Удаление вещи (только при редактировании, встроенное подтверждение без confirm()) -->
           <div id="itemDeleteWrap" class="hidden">
             <button id="itemDeleteTriggerBtn" type="button" class="btn btn-sm btn-red-soft">Удалить вещь</button>
             <div id="itemDeleteConfirmBox" class="inline-confirm-box hidden">
@@ -1728,7 +1790,7 @@
       </div>
     </div>
 
-    <!-- ===================== МОДАЛКА: ЗАЩИТА И ДАННЫЕ (6 СЕКЦИЙ ПО ПОРЯДКУ) ===================== -->
+    <!-- ===================== 6. МОДАЛКА: ЗАЩИТА И ДАННЫЕ (6 СЕКЦИЙ СТРОГО ПО ПОРЯДКУ) ===================== -->
     <div id="shieldModal" class="modal-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="shieldModalTitle">
       <div class="modal-sheet no-scrollbar">
         <div class="modal-head">
@@ -1787,14 +1849,12 @@
               <span id="pushPill" class="pill">Выкл</span>
             </div>
 
-            <!-- Информационная подсказка в предпросмотре -->
             <div id="previewPushHint" class="info-box hidden">
-              Вы смотрите предпросмотр в песочнице. Push-уведомления заработают автоматически после загрузки <strong>index.html</strong>, <strong>manifest.json</strong> и <strong>sw.js</strong> на GitHub Pages.
+              Вы смотрите предпросмотр в песочнице. Push-уведомления заработают автоматически после публикации <strong>index.html</strong>, <strong>manifest.json</strong> и <strong>sw.js</strong> на GitHub Pages.
             </div>
 
-            <!-- Подсказка для iPhone вне экрана «Домой» -->
             <div id="iosPushHint" class="hint-box hidden">
-              На iPhone сначала добавьте сайт на экран «Домой» через Поделиться → На экран «Домой», затем откройте с иконки.
+              На iPhone сначала добавьте сайт на экран «Домой» через Поделиться → На экран «Домой», затем откройте приложение с иконки.
             </div>
 
             <div class="switch-row">
@@ -1812,7 +1872,7 @@
             </div>
 
             <button id="testPushBtn" type="button" class="btn btn-sm btn-surface">
-              Проверить уведомление
+              Тест уведомления
             </button>
 
             <div id="pushStatusText" class="push-status-line">Уведомления выключены</div>
@@ -1833,7 +1893,7 @@
               </button>
               <label for="importBackupInput" class="btn btn-sm btn-surface" style="cursor: pointer;">
                 <input id="importBackupInput" type="file" accept="application/json,.json" class="sr-only" />
-                <span>Восстановить из файла</span>
+                <span>Восстановить</span>
               </label>
             </div>
 
@@ -1851,12 +1911,12 @@
             <p id="backupErrText" class="error-msg hidden" style="margin-top: 0;"></p>
           </section>
 
-          <!-- СЕКЦИЯ 4: ПРАВКА (СТРОГО ПОСЛЕ РЕЗЕРВНОЙ КОПИИ И ПЕРЕД БЛОКИРОВКОЙ) -->
+          <!-- СЕКЦИЯ 4: ПРАВКА -->
           <section class="shield-section">
             <div class="shield-section-head">
               <div>
                 <h4 class="sec-title">4. Правка</h4>
-                <p class="sec-desc">Быстрая смена цвета в 1 тап, редактирование и удаление карточек</p>
+                <p class="sec-desc">Смена цвета в 1 тап, редактирование и удаление карточек</p>
               </div>
               <span id="editModePill" class="pill">Выкл</span>
             </div>
@@ -1896,20 +1956,22 @@
             <div class="shield-section-head">
               <div>
                 <h4 class="sec-title">6. Демо-данные</h4>
-                <p class="sec-desc">6 стартовых примеров одежды для знакомства с приложением</p>
+                <p class="sec-desc">Примеры одежды на вешалках для знакомства с приложением</p>
               </div>
               <span id="demoPill" class="pill">0 шт.</span>
             </div>
 
-            <button id="removeDemoBtn" type="button" class="btn btn-sm btn-red-soft">Удалить демо-вещи</button>
-            <button id="restoreDemoBtn" type="button" class="btn btn-sm btn-surface hidden">Вернуть демо-вещи</button>
+            <div class="grid-2">
+              <button id="removeDemoBtn" type="button" class="btn btn-sm btn-red-soft">Удалить демо-вещи</button>
+              <button id="restoreDemoBtn" type="button" class="btn btn-sm btn-surface">Восстановить демо</button>
+            </div>
           </section>
 
         </div>
       </div>
     </div>
 
-    <!-- ===================== ПОЛНОЭКРАННЫЙ LIGHTBOX ===================== -->
+    <!-- ===================== 7. ПОЛНОЭКРАННЫЙ LIGHTBOX ===================== -->
     <div id="lightboxModal" class="lightbox-overlay hidden" role="dialog" aria-modal="true" aria-label="Просмотр фото">
       <button id="lightboxCloseBtn" type="button" class="lightbox-close" aria-label="Закрыть просмотр">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
@@ -1918,10 +1980,10 @@
       </button>
       <img id="lightboxImg" alt="Фото вещи" class="lightbox-img" />
       <div id="lightboxCaption" class="lightbox-caption"></div>
-      <div id="lightboxSub" class="lightbox-pill"></div>
+      <div id="lightboxSub" class="lightbox-tags"></div>
     </div>
 
-    <!-- ===================== ЭКРАН ВВОДА 4-ЗНАЧНОГО PIN-КОДА ===================== -->
+    <!-- ===================== 8. ЭКРАН ВВОДА 4-ЗНАЧНОГО PIN-КОДА ===================== -->
     <div id="pinOverlay" class="pin-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="pinOverlayTitle">
       <div class="pin-top">
         <button id="pinCancelBtn" type="button" class="btn btn-sm btn-surface hidden" style="width: auto; padding: 0 14px;">Отмена</button>
@@ -1945,7 +2007,7 @@
           <span class="pin-dot"></span>
         </div>
 
-        <p id="pinOverlayErr" style="margin: 14px 0 0; font-size: 12.5px; font-weight: 700; color: var(--red); min-height: 18px;"></p>
+        <p id="pinOverlayErr" style="margin: 14px 0 0; font-size: 12.5px; font-weight: 700; color: var(--red-dark); min-height: 18px;"></p>
       </div>
 
       <div class="pin-keypad">
@@ -1960,7 +2022,7 @@
         <button type="button" data-pin-key="9" class="pin-key">9</button>
         <div aria-hidden="true"></div>
         <button type="button" data-pin-key="0" class="pin-key">0</button>
-        <button id="pinBackBtn" type="button" class="pin-key" aria-label="Стереть цифру" style="background: var(--surface);">
+        <button id="pinBackBtn" type="button" class="pin-key" aria-label="Стереть цифру">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414-6.414A2 2 0 0110.828 5H19a2 2 0 012 2v10a2 2 0 01-2 2h-8.172a2 2 0 01-1.414-.586L3 12z" />
           </svg>
@@ -1982,37 +2044,86 @@
 
       const MAX_DIM = 700;
       const JPEG_QUALITY = 0.8;
-      const PIN_LS_KEY = 'garderob_pin_v2';
-      const LEGACY_PIN_FLAG = 'my_wardrobe_pin_enabled';
-      const PUSH_SETTINGS_LS_KEY = 'garderob_push_settings_v2';
-      const PUSH_SYNC_THROTTLE_MS = 5 * 60 * 1000;
+      const PUSH_SYNC_THROTTLE_MS = 5 * 60 * 1000; // Не чаще раза в 5 минут
 
-      // Безопасная привязка обработчиков событий
-      function on(el, evt, fn, opts) {
+      const PIN_LS_KEY = 'MyWardrobe_pinConfig_v2';
+      const LEGACY_PIN_FLAG = 'MyWardrobe_pinEnabled';
+      const PUSH_SETTINGS_LS_KEY = 'MyWardrobe_pushConfig_v1';
+      const LS_ITEMS_KEY = 'MyWardrobeDB_items_v1';
+      const LS_META_KEY = 'MyWardrobeDB_meta_v1';
+      const IDB_NAME = 'MyWardrobeDB';
+      const IDB_VERSION = 1;
+
+      // =========================================================================
+      // 2. БЕЗОПАСНЫЕ ХЕЛПЕРЫ ДЛЯ СОБЫТИЙ, ДАТ, STORAGE И СРЕДЫ ЗАПУСКА
+      // =========================================================================
+      function on(el, evt, handler, opts) {
         if (el && typeof el.addEventListener === 'function') {
-          el.addEventListener(evt, fn, opts);
+          el.addEventListener(evt, handler, opts);
         }
       }
 
-      // Локальная календарная дата YYYY-MM-DD (поддержка и Date/timestamp, и строки)
-      function getLocalDateKey(input) {
-        if (typeof input === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(input)) {
-          return input;
+      function safeLSGet(key) {
+        try {
+          return window.localStorage ? window.localStorage.getItem(key) : null;
+        } catch {
+          return null;
         }
-        const d = input ? new Date(input) : new Date();
+      }
+
+      function safeLSSet(key, value) {
+        try {
+          if (window.localStorage) {
+            window.localStorage.setItem(key, value);
+            return true;
+          }
+        } catch {}
+        return false;
+      }
+
+      function safeLSRemove(key) {
+        try {
+          if (window.localStorage) window.localStorage.removeItem(key);
+        } catch {}
+      }
+
+      // Начало локального календарного дня и разница в календарных днях
+      function getStartOfLocalDay(input) {
+        const d = input !== undefined && input !== null ? new Date(input) : new Date();
         if (Number.isNaN(d.getTime())) return null;
-        const y = d.getFullYear();
-        const m = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        return `${y}-${m}-${day}`;
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
       }
 
-      // Проверка запуска в изолированном предпросмотре / песочнице
+      function getCalendarDaysDiff(fromTs, toTs = Date.now()) {
+        const fromStart = getStartOfLocalDay(fromTs);
+        const toStart = getStartOfLocalDay(toTs);
+        if (fromStart === null || toStart === null) return 0;
+        return Math.max(0, Math.round((toStart - fromStart) / 86400000));
+      }
+
+      function getWornDaysLabel(selectedAt) {
+        const days = getCalendarDaysDiff(selectedAt || Date.now()) + 1;
+        return `${days} дн.`;
+      }
+
+      function getLaundryAgeInfo(laundryAt) {
+        if (!Number.isFinite(Number(laundryAt)) || Number(laundryAt) <= 0) return null;
+        const diff = getCalendarDaysDiff(Number(laundryAt));
+        return {
+          days: diff,
+          label: diff === 0 ? 'Сегодня' : `${diff} дн.`,
+          isToday: diff === 0,
+        };
+      }
+
+      // Определение запуска внутри изолированного предпросмотра / песочницы
       function isPreviewSandbox() {
         try {
           if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) return true;
-          if (!window.location || window.location.origin === 'null' || !window.location.origin) return true;
+          if (!window.location || !window.location.origin || window.location.origin === 'null') return true;
           if (['about:', 'file:', 'blob:', 'data:'].includes(window.location.protocol)) return true;
+          const host = String(window.location.hostname || '').toLowerCase();
+          if (host.includes('googleusercontent') || host.includes('usercontent.goog')) return true;
           const resolved = new URL('./sw.js', document.URL);
           if (resolved.origin !== window.location.origin) return true;
           return false;
@@ -2042,7 +2153,7 @@
       }
 
       // =========================================================================
-      // 2. СВЕТЛАЯ PNG-ИКОНКА 180x180 ДЛЯ iOS + РЕГИСТРАЦИЯ SERVICE WORKER
+      // 3. СВЕТЛАЯ PNG-ИКОНКА 180x180 ДЛЯ iOS И БЕЗОПАСНАЯ РЕГИСТРАЦИЯ SW
       // =========================================================================
       function attachAppleTouchIcon() {
         try {
@@ -2052,16 +2163,13 @@
           const ctx = canvas.getContext('2d');
           if (!ctx) return;
 
-          // Светлая карточка #ffffff
           ctx.fillStyle = '#ffffff';
           ctx.fillRect(0, 0, 180, 180);
 
-          // Тонкая светло-серая рамка
           ctx.strokeStyle = '#e5e7eb';
           ctx.lineWidth = 4;
           ctx.strokeRect(8, 8, 164, 164);
 
-          // Тёмная минималистичная вешалка #111827
           ctx.strokeStyle = '#111827';
           ctx.lineWidth = 9;
           ctx.lineCap = 'round';
@@ -2076,7 +2184,6 @@
           ctx.lineTo(90, 68);
           ctx.stroke();
 
-          // Светлый силуэт одежды под вешалкой
           ctx.fillStyle = '#f3f4f6';
           ctx.strokeStyle = '#111827';
           ctx.lineWidth = 5;
@@ -2096,9 +2203,7 @@
           link.sizes = '180x180';
           link.href = canvas.toDataURL('image/png');
           document.head.appendChild(link);
-        } catch (err) {
-          console.warn('apple-touch-icon skipped:', err);
-        }
+        } catch {}
       }
 
       function registerServiceWorkerSafely() {
@@ -2113,216 +2218,309 @@
       }
 
       // =========================================================================
-      // 3. 6 ЦВЕТНЫХ СВОТЧЕЙ И 6 ДЕМО-ВЕЩЕЙ (ВСТРОЕННЫЕ СВЕТЛЫЕ SVG-ПОСТЕРЫ)
+      // 4. СТУДИЙНЫЕ SVG-ВЕШАЛКИ ДЛЯ ДЕМО-ДАННЫХ И ЦВЕТНЫХ КАРТОЧЕК
       // =========================================================================
       const SWATCH_PALETTE = [
-        { id: 'white',   label: 'Белая',    bg: '#f8fafc', fill: '#ffffff', stroke: '#cbd5e1', detail: '#e2e8f0', cat: 'light', shape: 'tee' },
-        { id: 'beige',   label: 'Бежевая',  bg: '#faf6ef', fill: '#e8dcc8', stroke: '#bfa888', detail: '#d4c2a3', cat: 'light', shape: 'hoodie' },
-        { id: 'sky',     label: 'Голубая',  bg: '#eff6ff', fill: '#bfdbfe', stroke: '#60a5fa', detail: '#93c5fd', cat: 'light', shape: 'tee' },
-        { id: 'graphite',label: 'Графит',   bg: '#f3f4f6', fill: '#4b5563', stroke: '#1f2937', detail: '#374151', cat: 'dark',  shape: 'tee' },
-        { id: 'navy',    label: 'Тёмная',   bg: '#eef2f7', fill: '#1e3a5f', stroke: '#0f172a', detail: '#172554', cat: 'dark',  shape: 'sweatshirt' },
-        { id: 'black',   label: 'Чёрная',   bg: '#f3f4f6', fill: '#1f2937', stroke: '#111827', detail: '#374151', cat: 'dark',  shape: 'pants' },
+        { id: 'white',    label: 'Белая',   bg: '#f8fafc', fill: '#ffffff', stroke: '#cbd5e1', detail: '#e2e8f0', color: 'light', shape: 'tee' },
+        { id: 'beige',    label: 'Бежевая', bg: '#faf6ef', fill: '#dfd0b8', stroke: '#b39a78', detail: '#cbb696', color: 'light', shape: 'sweater' },
+        { id: 'sky',      label: 'Голубая', bg: '#f1f5f9', fill: '#c7d9ec', stroke: '#7fa1c3', detail: '#9cb7d4', color: 'light', shape: 'shirt' },
+        { id: 'graphite', label: 'Графит',  bg: '#f3f4f6', fill: '#4b5563', stroke: '#1f2937', detail: '#6b7280', color: 'dark',  shape: 'tee' },
+        { id: 'navy',     label: 'Тёмная',  bg: '#f1f5f9', fill: '#1e3a5f', stroke: '#0f172a', detail: '#334e73', color: 'dark',  shape: 'hoodie' },
+        { id: 'black',    label: 'Чёрная',  bg: '#f4f4f5', fill: '#1f2937', stroke: '#111827', detail: '#374151', color: 'dark',  shape: 'pants' },
       ];
 
-      function buildClothingPosterSvg(opts) {
-        const bg = opts.bg || '#f9fafb';
+      function buildStudioGarmentSvg(opts) {
+        const bg = opts.bg || '#f6f6f4';
         const fill = opts.fill || '#ffffff';
         const stroke = opts.stroke || '#9ca3af';
         const detail = opts.detail || '#cbd5e1';
         const shape = opts.shape || 'tee';
 
-        let garmentPath = '';
+        // Минималистичная деревянная вешалка в верхней части кадра
+        const hanger =
+          `<path d="M75 18 C75 12, 82 12, 82 17 C82 21, 75 22, 75 27" fill="none" stroke="#8a8f98" stroke-width="2.4" stroke-linecap="round"/>` +
+          `<path d="M75 27 L46 44 C44 45, 45 49, 48 49 H102 C105 49, 106 45, 104 44 Z" fill="#dfb98b" stroke="#b98f5f" stroke-width="1.6" stroke-linejoin="round"/>`;
+
+        let garment = '';
         if (shape === 'hoodie') {
-          garmentPath =
-            `<path d="M58 34 C58 20, 92 20, 92 34 L118 46 L134 118 L116 124 L106 78 L106 162 L44 162 L44 78 L34 124 L16 118 L32 46 Z" fill="${fill}" stroke="${stroke}" stroke-width="3" stroke-linejoin="round"/>` +
-            `<path d="M58 36 C66 50, 84 50, 92 36" fill="none" stroke="${detail}" stroke-width="3" stroke-linecap="round"/>` +
-            `<path d="M56 120 H94 L98 148 H52 Z" fill="none" stroke="${detail}" stroke-width="2.5" stroke-linejoin="round"/>` +
-            `<line x1="70" y1="48" x2="70" y2="74" stroke="${stroke}" stroke-width="2" stroke-linecap="round"/>` +
-            `<line x1="80" y1="48" x2="80" y2="74" stroke="${stroke}" stroke-width="2" stroke-linecap="round"/>`;
+          garment =
+            `<path d="M56 44 C64 36, 86 36, 94 44 L120 56 L136 136 L118 140 L108 92 L108 174 L42 174 L42 92 L32 140 L14 136 L30 56 Z" fill="${fill}" stroke="${stroke}" stroke-width="2.6" stroke-linejoin="round"/>` +
+            `<path d="M56 44 C64 58, 86 58, 94 44" fill="none" stroke="${detail}" stroke-width="2.6" stroke-linecap="round"/>` +
+            `<path d="M56 128 H94 L99 156 H51 Z" fill="none" stroke="${detail}" stroke-width="2.2" stroke-linejoin="round"/>` +
+            `<line x1="42" y1="164" x2="108" y2="164" stroke="${detail}" stroke-width="2.2"/>`;
+        } else if (shape === 'shirt') {
+          garment =
+            `<path d="M58 43 L30 55 L14 138 L31 142 L44 92 L44 174 Q75 182 106 174 L106 92 L119 142 L136 138 L120 55 L92 43 Z" fill="${fill}" stroke="${stroke}" stroke-width="2.6" stroke-linejoin="round"/>` +
+            `<path d="M58 43 L75 59 L92 43" fill="none" stroke="${stroke}" stroke-width="2.4" stroke-linejoin="round"/>` +
+            `<line x1="75" y1="59" x2="75" y2="177" stroke="${detail}" stroke-width="2"/>` +
+            `<circle cx="75" cy="76" r="1.9" fill="${stroke}"/><circle cx="75" cy="98" r="1.9" fill="${stroke}"/><circle cx="75" cy="120" r="1.9" fill="${stroke}"/><circle cx="75" cy="142" r="1.9" fill="${stroke}"/>`;
+        } else if (shape === 'sweater') {
+          garment =
+            `<path d="M56 44 L29 56 L14 136 L32 141 L44 92 L44 172 L106 172 L106 92 L118 141 L136 136 L121 56 L94 44 C86 56, 64 56, 56 44 Z" fill="${fill}" stroke="${stroke}" stroke-width="2.6" stroke-linejoin="round"/>` +
+            `<path d="M56 44 C64 56, 86 56, 94 44" fill="none" stroke="${detail}" stroke-width="3.2" stroke-linecap="round"/>` +
+            `<line x1="44" y1="160" x2="106" y2="160" stroke="${detail}" stroke-width="2.6"/>`;
         } else if (shape === 'pants') {
-          garmentPath =
-            `<path d="M46 34 H104 L112 166 H84 L75 84 L66 166 H38 Z" fill="${fill}" stroke="${stroke}" stroke-width="3" stroke-linejoin="round"/>` +
-            `<line x1="46" y1="46" x2="104" y2="46" stroke="${detail}" stroke-width="2.5"/>` +
-            `<line x1="75" y1="46" x2="75" y2="74" stroke="${detail}" stroke-width="2.5" stroke-linecap="round"/>`;
-        } else if (shape === 'sweatshirt') {
-          garmentPath =
-            `<path d="M55 38 L30 48 L15 118 L33 123 L45 78 L45 162 L105 162 L105 78 L117 123 L135 118 L120 48 L95 38 C87 50, 63 50, 55 38 Z" fill="${fill}" stroke="${stroke}" stroke-width="3" stroke-linejoin="round"/>` +
-            `<path d="M55 38 C63 50, 87 50, 95 38" fill="none" stroke="${detail}" stroke-width="3" stroke-linecap="round"/>` +
-            `<line x1="45" y1="152" x2="105" y2="152" stroke="${detail}" stroke-width="2.5"/>`;
+          garment =
+            `<path d="M47 46 H103 L112 178 H84 L75 96 L66 178 H38 Z" fill="${fill}" stroke="${stroke}" stroke-width="2.6" stroke-linejoin="round"/>` +
+            `<line x1="47" y1="58" x2="103" y2="58" stroke="${detail}" stroke-width="2.4"/>` +
+            `<line x1="75" y1="58" x2="75" y2="86" stroke="${detail}" stroke-width="2.2" stroke-linecap="round"/>`;
         } else {
           // Футболка
-          garmentPath =
-            `<path d="M55 38 L28 50 L17 94 L37 100 L46 74 L46 164 L104 164 L104 74 L113 100 L133 94 L122 50 L95 38 C87 52, 63 52, 55 38 Z" fill="${fill}" stroke="${stroke}" stroke-width="3" stroke-linejoin="round"/>` +
-            `<path d="M55 38 C63 52, 87 52, 95 38" fill="none" stroke="${detail}" stroke-width="3" stroke-linecap="round"/>`;
+          garment =
+            `<path d="M56 44 L28 56 L16 100 L36 106 L45 80 L45 174 L105 174 L105 80 L114 106 L134 100 L122 56 L94 44 C86 57, 64 57, 56 44 Z" fill="${fill}" stroke="${stroke}" stroke-width="2.6" stroke-linejoin="round"/>` +
+            `<path d="M56 44 C64 57, 86 57, 94 44" fill="none" stroke="${detail}" stroke-width="2.8" stroke-linecap="round"/>`;
         }
 
         const svg =
           `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 200">` +
           `<rect width="150" height="200" fill="${bg}"/>` +
-          `<circle cx="75" cy="96" r="56" fill="#111827" fill-opacity="0.03"/>` +
-          garmentPath +
+          `<ellipse cx="75" cy="182" rx="44" ry="5" fill="#111827" fill-opacity="0.06"/>` +
+          (shape === 'pants' ? '' : hanger) +
+          garment +
           `</svg>`;
         return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
       }
 
+      // 9 выразительных демо-вещей: показывают «На сегодня», «В носке» (3 дн.), «Чистое» (с бейджем многодн.) и «В стирке» (от давних к свежим)
       function createDemoItems() {
-        const base = Date.now();
+        const now = Date.now();
+        const DAY = 86400000;
         return [
           {
-            id: 'demo_light_1',
+            id: 'demo_today_tee',
             name: 'Белая футболка',
-            category: 'light',
-            status: 'clean',
+            color: 'light',
+            wearMode: 'single',
+            status: 'wearing',
+            selectedAt: now,
             isDemo: true,
-            photoDataUrl: buildClothingPosterSvg({ bg: '#f8fafc', fill: '#ffffff', stroke: '#94a3b8', detail: '#cbd5e1', shape: 'tee' }),
-            createdAt: base + 1,
+            photoDataUrl: buildStudioGarmentSvg({ bg: '#f7f7f5', fill: '#ffffff', stroke: '#cbd5e1', detail: '#e2e8f0', shape: 'tee' }),
+            createdAt: now - 9 * DAY,
           },
           {
-            id: 'demo_light_2',
-            name: 'Светлое худи',
-            category: 'light',
-            status: 'clean',
+            id: 'demo_inuse_hoodie',
+            name: 'Чёрное худи',
+            color: 'dark',
+            wearMode: 'multi',
+            status: 'wearing',
+            selectedAt: now - 2 * DAY, // 2 календарных дня назад -> "3 дн."
             isDemo: true,
-            photoDataUrl: buildClothingPosterSvg({ bg: '#f4f6f8', fill: '#e5e7eb', stroke: '#9ca3af', detail: '#d1d5db', shape: 'hoodie' }),
-            createdAt: base + 2,
+            photoDataUrl: buildStudioGarmentSvg({ bg: '#f5f5f4', fill: '#1f2329', stroke: '#111827', detail: '#3b4252', shape: 'hoodie' }),
+            createdAt: now - 8 * DAY,
           },
           {
-            id: 'demo_light_3',
-            name: 'Бежевые брюки',
-            category: 'light',
+            id: 'demo_clean_shirt',
+            name: 'Кремовая рубашка',
+            color: 'light',
+            wearMode: 'single',
             status: 'clean',
             isDemo: true,
-            photoDataUrl: buildClothingPosterSvg({ bg: '#faf6ef', fill: '#e6d7be', stroke: '#b59c78', detail: '#cbb692', shape: 'pants' }),
-            createdAt: base + 3,
+            photoDataUrl: buildStudioGarmentSvg({ bg: '#f7f6f2', fill: '#f6efe2', stroke: '#cbbca4', detail: '#d8ccb7', shape: 'shirt' }),
+            createdAt: now - 7 * DAY,
           },
           {
-            id: 'demo_dark_1',
+            id: 'demo_clean_sweater',
+            name: 'Бежевый свитер',
+            color: 'light',
+            wearMode: 'multi',
+            status: 'clean',
+            isDemo: true,
+            photoDataUrl: buildStudioGarmentSvg({ bg: '#f8f6f1', fill: '#d6c2a5', stroke: '#a99171', detail: '#bfa989', shape: 'sweater' }),
+            createdAt: now - 6 * DAY,
+          },
+          {
+            id: 'demo_clean_dark_tee',
             name: 'Графитовая футболка',
-            category: 'dark',
+            color: 'dark',
+            wearMode: 'single',
             status: 'clean',
             isDemo: true,
-            photoDataUrl: buildClothingPosterSvg({ bg: '#f3f4f6', fill: '#4b5563', stroke: '#1f2937', detail: '#6b7280', shape: 'tee' }),
-            createdAt: base + 4,
+            photoDataUrl: buildStudioGarmentSvg({ bg: '#f4f4f6', fill: '#3f4652', stroke: '#1f2937', detail: '#5b6472', shape: 'tee' }),
+            createdAt: now - 5 * DAY,
           },
           {
-            id: 'demo_dark_2',
+            id: 'demo_clean_jeans',
             name: 'Чёрные джинсы',
-            category: 'dark',
+            color: 'dark',
+            wearMode: 'multi',
             status: 'clean',
             isDemo: true,
-            photoDataUrl: buildClothingPosterSvg({ bg: '#f1f5f9', fill: '#1f2937', stroke: '#0f172a', detail: '#4b5563', shape: 'pants' }),
-            createdAt: base + 5,
+            photoDataUrl: buildStudioGarmentSvg({ bg: '#f3f4f6', fill: '#22262e', stroke: '#111827', detail: '#4b5563', shape: 'pants' }),
+            createdAt: now - 4 * DAY,
           },
           {
-            id: 'demo_dark_3',
-            name: 'Тёмный свитшот',
-            category: 'dark',
-            status: 'clean',
+            id: 'demo_laundry_light_old',
+            name: 'Голубая рубашка',
+            color: 'light',
+            wearMode: 'single',
+            status: 'laundry',
+            laundryAt: now - 4 * DAY, // 4 дня в корзине -> первая в «Светлое»
             isDemo: true,
-            photoDataUrl: buildClothingPosterSvg({ bg: '#eef2f7', fill: '#1e3a5f', stroke: '#0f172a', detail: '#3b82f6', shape: 'sweatshirt' }),
-            createdAt: base + 6,
+            photoDataUrl: buildStudioGarmentSvg({ bg: '#f5f7fa', fill: '#c8d8e8', stroke: '#8ba4be', detail: '#a6bdd4', shape: 'shirt' }),
+            createdAt: now - 10 * DAY,
+          },
+          {
+            id: 'demo_laundry_light_today',
+            name: 'Светлая футболка',
+            color: 'light',
+            wearMode: 'single',
+            status: 'laundry',
+            laundryAt: now, // Сегодня -> после давней
+            isDemo: true,
+            photoDataUrl: buildStudioGarmentSvg({ bg: '#f8fafc', fill: '#f1f5f9', stroke: '#94a3b8', detail: '#cbd5e1', shape: 'tee' }),
+            createdAt: now - 3 * DAY,
+          },
+          {
+            id: 'demo_laundry_dark_old',
+            name: 'Тёмная футболка',
+            color: 'dark',
+            wearMode: 'single',
+            status: 'laundry',
+            laundryAt: now - 2 * DAY, // 2 дня в корзине
+            isDemo: true,
+            photoDataUrl: buildStudioGarmentSvg({ bg: '#f4f4f5', fill: '#1e293b', stroke: '#0f172a', detail: '#334155', shape: 'tee' }),
+            createdAt: now - 2 * DAY,
           },
         ];
       }
 
-      // Нормализация статуса (поддержка совместимости со старым статусом 'wearing')
+      // Нормализация с полной обратной совместимостью со старыми версиями и бэкапами v1
       function normalizeItem(raw, fallbackIdx = 0) {
         if (!raw || typeof raw !== 'object') return null;
+
         let status = raw.status;
-        if (status === 'wearing') status = 'worn';
-        if (status !== 'clean' && status !== 'worn' && status !== 'laundry') {
+        if (status === 'worn') status = 'wearing';
+        if (status === 'dirty') status = 'laundry';
+        if (status !== 'clean' && status !== 'wearing' && status !== 'laundry') {
           status = 'clean';
         }
+
+        const color = (raw.color === 'dark' || raw.category === 'dark') ? 'dark' : 'light';
+        const wearMode = (raw.wearMode === 'multi' || raw.multiDay === true) ? 'multi' : 'single';
+
         const item = {
           id: String(raw.id || `item_${Date.now()}_${fallbackIdx}`),
           name: typeof raw.name === 'string' ? raw.name.trim().slice(0, 32) : '',
-          category: raw.category === 'dark' ? 'dark' : 'light',
+          color,
+          wearMode,
           status,
           isDemo: Boolean(raw.isDemo),
           photoDataUrl:
             typeof raw.photoDataUrl === 'string' && raw.photoDataUrl.length > 0
               ? raw.photoDataUrl
-              : buildClothingPosterSvg({
+              : buildStudioGarmentSvg({
                   bg: '#f3f4f6',
-                  fill: raw.category === 'dark' ? '#374151' : '#ffffff',
+                  fill: color === 'dark' ? '#374151' : '#ffffff',
                   stroke: '#9ca3af',
                   shape: 'tee',
                 }),
           createdAt: Number(raw.createdAt) || Date.now(),
         };
-        if (item.status === 'worn') {
-          const ts = raw.selectedAt || raw.wornDate;
-          if (typeof ts === 'number' && Number.isFinite(ts)) {
+
+        if (item.status === 'wearing') {
+          const ts = raw.selectedAt !== undefined ? raw.selectedAt : raw.wornDate;
+          if (typeof ts === 'number' && Number.isFinite(ts) && ts > 0) {
             item.selectedAt = ts;
           } else if (typeof ts === 'string' && ts.trim()) {
-            const parsedDate = Date.parse(ts);
-            item.selectedAt = Number.isFinite(parsedDate) ? parsedDate : Date.now();
+            const parsed = Date.parse(ts);
+            item.selectedAt = Number.isFinite(parsed) ? parsed : Date.now();
           } else {
             item.selectedAt = Date.now();
           }
+        } else if (item.status === 'laundry') {
+          const lts = raw.laundryAt !== undefined ? raw.laundryAt : raw.dirtyAt;
+          if (typeof lts === 'number' && Number.isFinite(lts) && lts > 0) {
+            item.laundryAt = lts;
+          } else if (typeof lts === 'string' && lts.trim()) {
+            const parsed = Date.parse(lts);
+            if (Number.isFinite(parsed) && parsed > 0) item.laundryAt = parsed;
+          }
         }
+
         return item;
       }
 
       // =========================================================================
-      // 4. БЕЗОПАСНОЕ ХРАНИЛИЩЕ: INDEXEDDB -> LOCALSTORAGE -> RAM
+      // 5. НАДЁЖНОЕ ХРАНИЛИЩЕ: INDEXEDDB -> LOCALSTORAGE -> RAM FALLBACK
       // =========================================================================
-      const IDB_NAME = 'MyWardrobeDB';
-      const IDB_VERSION = 1;
-      const LS_ITEMS_KEY = 'MyWardrobeDB_items_v1';
-      const LS_META_KEY = 'MyWardrobeDB_meta_v1';
-
       const Storage = {
         db: null,
-        mode: 'Память сессии', // 'IndexedDB' | 'localStorage' | 'Память сессии'
+        mode: 'Память сессии',
         ramItems: [],
         ramMeta: new Map(),
 
         async init() {
-          // 1) Пробуем IndexedDB с таймаутом
+          // 1) IndexedDB с защитой от SecurityError и таймаутом
           try {
-            if (typeof indexedDB !== 'undefined') {
+            if (typeof window !== 'undefined' && 'indexedDB' in window && window.indexedDB) {
               this.db = await new Promise((resolve, reject) => {
-                const timer = setTimeout(() => reject(new Error('IDB timeout')), 1500);
-                const req = indexedDB.open(IDB_NAME, IDB_VERSION);
-                req.onupgradeneeded = (e) => {
-                  const db = e.target.result;
-                  if (!db.objectStoreNames.contains('items')) {
-                    db.createObjectStore('items', { keyPath: 'id' });
+                let done = false;
+                const timer = setTimeout(() => {
+                  if (!done) {
+                    done = true;
+                    reject(new Error('IDB timeout'));
                   }
-                  if (!db.objectStoreNames.contains('meta')) {
-                    db.createObjectStore('meta');
+                }, 1500);
+
+                try {
+                  const req = window.indexedDB.open(IDB_NAME, IDB_VERSION);
+                  req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('items')) {
+                      db.createObjectStore('items', { keyPath: 'id' });
+                    }
+                    if (!db.objectStoreNames.contains('meta')) {
+                      db.createObjectStore('meta');
+                    }
+                  };
+                  req.onsuccess = () => {
+                    if (!done) {
+                      done = true;
+                      clearTimeout(timer);
+                      resolve(req.result);
+                    }
+                  };
+                  req.onerror = () => {
+                    if (!done) {
+                      done = true;
+                      clearTimeout(timer);
+                      reject(req.error || new Error('IDB open error'));
+                    }
+                  };
+                  req.onblocked = () => {
+                    if (!done) {
+                      done = true;
+                      clearTimeout(timer);
+                      reject(new Error('IDB blocked'));
+                    }
+                  };
+                } catch (openErr) {
+                  if (!done) {
+                    done = true;
+                    clearTimeout(timer);
+                    reject(openErr);
                   }
-                };
-                req.onsuccess = () => {
-                  clearTimeout(timer);
-                  resolve(req.result);
-                };
-                req.onerror = () => {
-                  clearTimeout(timer);
-                  reject(req.error || new Error('IDB open error'));
-                };
+                }
               });
               this.mode = 'IndexedDB';
               return;
             }
           } catch (err) {
-            console.warn('IndexedDB unavailable, trying localStorage:', err);
+            console.warn('IndexedDB unavailable, falling back:', err);
           }
 
-          // 2) Пробуем localStorage
+          // 2) localStorage
           try {
-            const probe = '__wardrobe_ls_probe__';
-            localStorage.setItem(probe, '1');
-            localStorage.removeItem(probe);
-            this.mode = 'localStorage';
-            return;
-          } catch (err) {
-            console.warn('localStorage unavailable, using RAM fallback:', err);
-          }
+            const probe = '__wardrobe_probe__';
+            if (safeLSSet(probe, '1')) {
+              safeLSRemove(probe);
+              this.mode = 'localStorage';
+              return;
+            }
+          } catch {}
 
-          // 3) Память сессии (RAM)
-          this.mode = 'Память сессии';
+          // 3) RAM (песочница / строгие ограничения браузера)
+          this.mode = 'Память сессии (песочница)';
         },
 
         async getAllItems() {
@@ -2339,12 +2537,12 @@
                 .filter(Boolean)
                 .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
             } catch (err) {
-              console.warn('IDB read items error:', err);
+              console.warn('IDB read error:', err);
             }
           }
           if (this.mode === 'localStorage') {
             try {
-              const raw = localStorage.getItem(LS_ITEMS_KEY);
+              const raw = safeLSGet(LS_ITEMS_KEY);
               const parsed = raw ? JSON.parse(raw) : [];
               return Array.isArray(parsed)
                 ? parsed.map((r, idx) => normalizeItem(r, idx)).filter(Boolean)
@@ -2370,16 +2568,13 @@
               });
               return true;
             } catch (err) {
-              console.warn('IDB save items error:', err);
+              console.warn('IDB write error:', err);
             }
           }
           if (this.mode === 'localStorage' || this.mode === 'IndexedDB') {
             try {
-              localStorage.setItem(LS_ITEMS_KEY, JSON.stringify(items));
-              return true;
-            } catch (err) {
-              console.warn('localStorage save items error:', err);
-            }
+              return safeLSSet(LS_ITEMS_KEY, JSON.stringify(items));
+            } catch {}
           }
           return false;
         },
@@ -2393,13 +2588,11 @@
                 req.onsuccess = () => resolve(req.result);
                 req.onerror = () => reject(req.error);
               });
-            } catch (err) {
-              console.warn('IDB getMeta error:', err);
-            }
+            } catch {}
           }
           if (this.mode === 'localStorage') {
             try {
-              const raw = localStorage.getItem(LS_META_KEY);
+              const raw = safeLSGet(LS_META_KEY);
               const parsed = raw ? JSON.parse(raw) : {};
               return parsed[key];
             } catch {
@@ -2420,20 +2613,16 @@
                 req.onerror = () => reject(req.error);
               });
               return true;
-            } catch (err) {
-              console.warn('IDB setMeta error:', err);
-            }
-          }
-          if (this.mode === 'localStorage' || this.mode === 'IndexedDB') {
-            try {
-              const raw = localStorage.getItem(LS_META_KEY);
-              const parsed = raw ? JSON.parse(raw) : {};
-              parsed[key] = value;
-              localStorage.setItem(LS_META_KEY, JSON.stringify(parsed));
-              return true;
             } catch {}
           }
-          return false;
+          try {
+            const raw = safeLSGet(LS_META_KEY);
+            const parsed = raw ? JSON.parse(raw) : {};
+            parsed[key] = value;
+            return safeLSSet(LS_META_KEY, JSON.stringify(parsed));
+          } catch {
+            return false;
+          }
         },
 
         async deleteMeta(key) {
@@ -2449,18 +2638,18 @@
             } catch {}
           }
           try {
-            const raw = localStorage.getItem(LS_META_KEY);
+            const raw = safeLSGet(LS_META_KEY);
             if (raw) {
               const parsed = JSON.parse(raw);
               delete parsed[key];
-              localStorage.setItem(LS_META_KEY, JSON.stringify(parsed));
+              safeLSSet(LS_META_KEY, JSON.stringify(parsed));
             }
           } catch {}
         },
       };
 
       // =========================================================================
-      // 5. КРИПТОГРАФИЯ PIN: SHA-256 + FALLBACK + 16-БАЙТНАЯ СОЛЬ + САМОИСЦЕЛЕНИЕ
+      // 6. КРИПТОГРАФИЯ PIN: SHA-256 + FALLBACK (С console.warn) + САМОИСЦЕЛЕНИЕ
       // =========================================================================
       function sha256Fallback(str) {
         const utf8 = unescape(encodeURIComponent(str));
@@ -2539,9 +2728,9 @@
             return Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
           }
         } catch (err) {
-          console.warn('Web Crypto API error:', err);
+          console.warn('Web Crypto subtle unavailable:', err);
         }
-        console.warn('Web Crypto API unavailable, using sha256Fallback');
+        console.warn('Web Crypto API unavailable — using sha256Fallback');
         return sha256Fallback(String(text));
       }
 
@@ -2559,7 +2748,7 @@
         return Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
       }
 
-      // Строгий инвариант: валидная запись PIN должна иметь enabled: true, 32-hex salt и 64-hex hash
+      // Инвариант: валидный PIN обязан иметь enabled: true, 32-hex salt и 64-hex hash
       function isValidPinConfig(cfg) {
         return Boolean(
           cfg &&
@@ -2574,42 +2763,42 @@
 
       function readPinFromLocalStorage() {
         try {
-          const raw = localStorage.getItem(PIN_LS_KEY);
+          const raw = safeLSGet(PIN_LS_KEY);
           if (!raw) return null;
           const parsed = JSON.parse(raw);
           if (!isValidPinConfig(parsed)) {
-            // Самоисцеление: удаляем битую запись, чтобы никогда не было вечного лока
-            localStorage.removeItem(PIN_LS_KEY);
+            safeLSRemove(PIN_LS_KEY);
             return null;
           }
           return { enabled: true, salt: parsed.salt, hash: parsed.hash };
         } catch {
-          try { localStorage.removeItem(PIN_LS_KEY); } catch {}
+          safeLSRemove(PIN_LS_KEY);
           return null;
         }
       }
 
       // =========================================================================
-      // 6. СОСТОЯНИЕ ПРИЛОЖЕНИЯ И ССЫЛКИ НА DOM
+      // 7. СОСТОЯНИЕ ПРИЛОЖЕНИЯ И ССЫЛКИ НА DOM
       // =========================================================================
       const state = {
         items: [],
         activeTab: 0, // 0 = Чистое, 1 = В стирке
         editMode: false,
 
-        // Модалка добавления / редактирования
-        modalMode: 'add', // 'add' | 'edit'
+        // Модалка добавления / редактирования вещи
+        modalMode: 'add',
         editingId: null,
-        formCategory: 'light',
+        formColor: 'light',
+        formWearMode: 'single',
         formStatus: 'clean',
         formPhotoDataUrl: null,
         formStubId: null,
 
         // Хранилище и PWA
         deferredInstallPrompt: null,
-        persistStatus: 'unknown', // 'persisted' | 'not_persisted' | 'unsupported' | 'unknown'
+        persistStatus: 'unknown',
 
-        // Настройки Push-уведомлений
+        // Настройки Push
         push: {
           enabled: false,
           time: '21:00',
@@ -2620,13 +2809,13 @@
           lastVisibilityCheckAt: 0,
         },
 
-        // Импорт бэкапа (ожидание подтверждения при отсутствии метки app)
+        // Временный буфер при импорте без метки app
         pendingForceImportItems: null,
 
         // PIN-код
         pinConfig: null,
         pinUnlockedSession: false,
-        pinFlow: null, // 'unlock' | 'setup' | 'setup_confirm' | 'change_verify' | 'disable_verify'
+        pinFlow: null,
         pinBuffer: '',
         pinFirstEntry: '',
 
@@ -2654,11 +2843,16 @@
         laundryPane: $('laundryPane'),
 
         wearingPanel: $('wearingPanel'),
-        wearingCount: $('wearingCount'),
-        allWearingToLaundryBtn: $('allWearingToLaundryBtn'),
+        todaySection: $('todaySection'),
+        todayCount: $('todayCount'),
+        todayToLaundryBtn: $('todayToLaundryBtn'),
         morningNudge: $('morningNudge'),
         morningNudgeBtn: $('morningNudgeBtn'),
-        wearingGrid: $('wearingGrid'),
+        todayGrid: $('todayGrid'),
+        wearingDivider: $('wearingDivider'),
+        inUseSection: $('inUseSection'),
+        inUseCount: $('inUseCount'),
+        inUseGrid: $('inUseGrid'),
 
         cleanLightCount: $('cleanLightCount'),
         cleanLightGrid: $('cleanLightGrid'),
@@ -2682,7 +2876,7 @@
         toastMsg: $('toastMsg'),
         toastUndoBtn: $('toastUndoBtn'),
 
-        // Единая модалка Добавить / Редактировать вещь
+        // Модалка добавления / редактирования
         itemModal: $('itemModal'),
         itemModalTitle: $('itemModalTitle'),
         itemModalSubtitle: $('itemModalSubtitle'),
@@ -2699,6 +2893,8 @@
         itemStubGrid: $('itemStubGrid'),
         itemCatLightBtn: $('itemCatLightBtn'),
         itemCatDarkBtn: $('itemCatDarkBtn'),
+        itemModeSingleBtn: $('itemModeSingleBtn'),
+        itemModeMultiBtn: $('itemModeMultiBtn'),
         itemStatusGroup: $('itemStatusGroup'),
         itemNameInput: $('itemNameInput'),
         itemSubmitBtn: $('itemSubmitBtn'),
@@ -2708,7 +2904,7 @@
         itemDeleteCancelBtn: $('itemDeleteCancelBtn'),
         itemDeleteConfirmBtn: $('itemDeleteConfirmBtn'),
 
-        // Модалка «Защита и данные» (6 секций)
+        // Модалка «Защита и данные»
         shieldModal: $('shieldModal'),
         closeShieldModalBtn: $('closeShieldModalBtn'),
         pwaModeDesc: $('pwaModeDesc'),
@@ -2769,7 +2965,7 @@
       };
 
       // =========================================================================
-      // 7. TOAST, UNDO И СЖАТИЕ ФОТО (700px / JPEG 0.8 БЕЗ EXIF)
+      // 8. TOAST, UNDO И СЖАТИЕ ФОТО (700px / JPEG 0.8 БЕЗ EXIF/GPS)
       // =========================================================================
       function cloneItems(list) {
         return list.map(item => ({ ...item }));
@@ -2847,7 +3043,7 @@
       }
 
       // =========================================================================
-      // 8. ОПЕРАЦИИ С ГАРДЕРОБОМ
+      // 9. ОПЕРАЦИИ С ГАРДЕРОБОМ
       // =========================================================================
       async function moveItemStatus(itemId, nextStatus, toastText, allowUndo = true) {
         const idx = state.items.findIndex(i => i.id === itemId);
@@ -2855,15 +3051,20 @@
 
         if (allowUndo) captureUndo();
         const updated = { ...state.items[idx], status: nextStatus };
-        if (nextStatus === 'worn') {
+        if (nextStatus === 'wearing') {
           updated.selectedAt = Date.now();
+          delete updated.laundryAt;
+        } else if (nextStatus === 'laundry') {
+          updated.laundryAt = Date.now();
+          delete updated.selectedAt;
         } else {
           delete updated.selectedAt;
+          delete updated.laundryAt;
         }
         state.items[idx] = updated;
         renderAll();
 
-        if (nextStatus === 'worn' && els.cleanPane) {
+        if (nextStatus === 'wearing' && els.cleanPane) {
           els.cleanPane.scrollTo({ top: 0, behavior: 'smooth' });
         }
         if (toastText) showToast(toastText, allowUndo);
@@ -2875,28 +3076,29 @@
         if (idx === -1) return;
 
         captureUndo();
-        const nextCat = state.items[idx].category === 'light' ? 'dark' : 'light';
-        state.items[idx] = { ...state.items[idx], category: nextCat };
+        const nextColor = state.items[idx].color === 'light' ? 'dark' : 'light';
+        state.items[idx] = { ...state.items[idx], color: nextColor };
         renderAll();
-        showToast(nextCat === 'dark' ? 'Перенесено в «Тёмное»' : 'Перенесено в «Светлое»', true);
+        showToast(nextColor === 'dark' ? 'Перенесено в «Тёмное»' : 'Перенесено в «Светлое»', true);
         await saveItemsAndRefresh();
       }
 
-      async function sendWornToLaundry(onlyPreviousDays = false) {
-        const todayKey = getLocalDateKey(Date.now());
+      // Вечерний сброс: отправляет в стирку ТОЛЬКО однодневные вещи из «На сегодня» (не трогает «В носке»!)
+      async function sendTodayToLaundry(onlyBeforeToday = false) {
+        const startOfToday = getStartOfLocalDay(Date.now());
         const targets = state.items.filter(i => {
-          if (i.status !== 'worn') return false;
-          if (!onlyPreviousDays) return true;
-          const itemDay = getLocalDateKey(i.selectedAt);
-          return Boolean(itemDay && itemDay !== todayKey);
+          if (i.status !== 'wearing' || i.wearMode === 'multi') return false;
+          if (!onlyBeforeToday) return true;
+          return Number.isFinite(Number(i.selectedAt)) && Number(i.selectedAt) < startOfToday;
         });
         if (targets.length === 0) return;
 
         captureUndo();
+        const now = Date.now();
         const targetIds = new Set(targets.map(t => t.id));
         state.items = state.items.map(i => {
           if (!targetIds.has(i.id)) return i;
-          const next = { ...i, status: 'laundry' };
+          const next = { ...i, status: 'laundry', laundryAt: now };
           delete next.selectedAt;
           return next;
         });
@@ -2905,16 +3107,20 @@
         await saveItemsAndRefresh();
       }
 
-      async function washCategoryLaundry(category) {
-        const count = state.items.filter(i => i.status === 'laundry' && i.category === category).length;
+      async function washColorLaundry(color) {
+        const count = state.items.filter(i => i.status === 'laundry' && i.color === color).length;
         if (count === 0) return;
 
         captureUndo();
-        state.items = state.items.map(i =>
-          (i.status === 'laundry' && i.category === category) ? { ...i, status: 'clean' } : i
-        );
+        state.items = state.items.map(i => {
+          if (i.status !== 'laundry' || i.color !== color) return i;
+          const next = { ...i, status: 'clean' };
+          delete next.laundryAt;
+          delete next.selectedAt;
+          return next;
+        });
         renderAll();
-        showToast(`${category === 'light' ? 'Светлое' : 'Тёмное'} постирано (${count})`, true);
+        showToast(`${color === 'light' ? 'Светлое' : 'Тёмное'} постирано (${count})`, true);
         await saveItemsAndRefresh();
       }
 
@@ -2952,12 +3158,12 @@
         state.items = [...demos, ...state.items];
         renderAll();
         closeShieldModal();
-        showToast(`Возвращено демо-вещей: ${demos.length}`, true);
+        showToast(`Восстановлено демо-вещей: ${demos.length}`, true);
         await saveItemsAndRefresh();
       }
 
       // =========================================================================
-      // 9. РЕНДЕРИНГ КАРТОЧЕК, СЕТОК И ВКЛАДОК
+      // 10. РЕНДЕРИНГ КАРТОЧЕК, СЕТОК И ПЕРЕКЛЮЧЕНИЕ ВКЛАДОК
       // =========================================================================
       function updateTabVisuals(progress) {
         const clamped = Math.max(0, Math.min(1, progress));
@@ -2988,9 +3194,34 @@
       function openLightbox(item) {
         els.lightboxImg.src = item.photoDataUrl;
         els.lightboxCaption.textContent = item.name || 'Без названия';
-        const catText = item.category === 'light' ? 'Светлое' : 'Тёмное';
-        const statusText = { clean: 'Чистое', worn: 'На мне сегодня', laundry: 'В стирке' }[item.status] || 'Чистое';
-        els.lightboxSub.textContent = `${catText} • ${statusText}`;
+
+        const tags = [
+          item.color === 'light' ? 'Светлое' : 'Тёмное',
+          item.wearMode === 'multi' ? 'На несколько дней' : 'На 1 день',
+        ];
+
+        if (item.status === 'wearing') {
+          if (item.wearMode === 'multi') {
+            tags.push(`В носке: ${getWornDaysLabel(item.selectedAt)}`);
+          } else {
+            const diff = getCalendarDaysDiff(item.selectedAt || Date.now());
+            tags.push(diff === 0 ? 'На сегодня' : `На мне: ${diff + 1} дн.`);
+          }
+        } else if (item.status === 'laundry') {
+          const age = getLaundryAgeInfo(item.laundryAt);
+          tags.push(age ? `В стирке: ${age.label}` : 'В стирке');
+        } else {
+          tags.push('Чистое');
+        }
+
+        els.lightboxSub.innerHTML = '';
+        tags.forEach(text => {
+          const pill = document.createElement('span');
+          pill.className = 'lightbox-pill';
+          pill.textContent = text;
+          els.lightboxSub.appendChild(pill);
+        });
+
         els.lightboxModal.classList.remove('hidden');
       }
 
@@ -3021,7 +3252,7 @@
         }
 
         if (state.editMode) {
-          // Кнопка редактирования ✎ в левом верхнем углу
+          // В режиме правки: кнопка ✎ в левом верхнем углу
           const editBtn = document.createElement('button');
           editBtn.type = 'button';
           editBtn.className = 'card-edit-overlay-btn';
@@ -3036,17 +3267,40 @@
 
           on(media, 'click', () => openEditItemModal(item.id));
         } else {
-          // В блоке «На мне сегодня» — маленькая кнопка возврата ↩ в правом верхнем углу
-          if (viewMode === 'worn') {
+          // Угловые бейджи
+          if (viewMode === 'inUse') {
+            const badge = document.createElement('span');
+            badge.className = 'poster-badge poster-badge-tl poster-badge-days';
+            badge.textContent = getWornDaysLabel(item.selectedAt);
+            media.appendChild(badge);
+          } else if (viewMode === 'laundry') {
+            const age = getLaundryAgeInfo(item.laundryAt);
+            if (age) {
+              const badge = document.createElement('span');
+              badge.className = age.isToday
+                ? 'poster-badge poster-badge-tl poster-badge-dirty-today'
+                : 'poster-badge poster-badge-tl poster-badge-dirty';
+              badge.textContent = age.label;
+              media.appendChild(badge);
+            }
+          } else if (viewMode === 'clean' && item.wearMode === 'multi') {
+            const badge = document.createElement('span');
+            badge.className = 'poster-badge poster-badge-tr poster-badge-multi';
+            badge.textContent = 'многодн.';
+            media.appendChild(badge);
+          }
+
+          // Кнопка возврата в шкаф (↩) в «На сегодня» и «В носке»
+          if (viewMode === 'today' || viewMode === 'inUse') {
             const undoTopBtn = document.createElement('button');
             undoTopBtn.type = 'button';
             undoTopBtn.className = 'card-undo-top-btn';
             undoTopBtn.textContent = '↩';
-            undoTopBtn.title = 'Вернуть в чистое';
-            undoTopBtn.setAttribute('aria-label', 'Вернуть в чистое');
+            undoTopBtn.title = 'В шкаф';
+            undoTopBtn.setAttribute('aria-label', 'В шкаф');
             on(undoTopBtn, 'click', (e) => {
               e.stopPropagation();
-              moveItemStatus(item.id, 'clean', 'Возвращено в «Чистое»', true);
+              moveItemStatus(item.id, 'clean', 'Возвращено в шкаф', true);
             });
             media.appendChild(undoTopBtn);
           }
@@ -3063,7 +3317,7 @@
         if (state.editMode) {
           const swapBtn = document.createElement('button');
           swapBtn.type = 'button';
-          if (item.category === 'light') {
+          if (item.color === 'light') {
             swapBtn.className = 'card-btn card-btn-to-dark';
             swapBtn.textContent = '→ Тёмное';
           } else {
@@ -3080,9 +3334,16 @@
           selectBtn.type = 'button';
           selectBtn.className = 'card-btn card-btn-green';
           selectBtn.textContent = 'Выбрать';
-          on(selectBtn, 'click', () => moveItemStatus(item.id, 'worn', 'Выбрано на сегодня', true));
+          on(selectBtn, 'click', () =>
+            moveItemStatus(
+              item.id,
+              'wearing',
+              item.wearMode === 'multi' ? 'Добавлено в «В носке»' : 'Выбрано на сегодня',
+              true
+            )
+          );
           footer.appendChild(selectBtn);
-        } else if (viewMode === 'worn') {
+        } else if (viewMode === 'today' || viewMode === 'inUse') {
           const dirtyBtn = document.createElement('button');
           dirtyBtn.type = 'button';
           dirtyBtn.className = 'card-btn card-btn-orange';
@@ -3093,7 +3354,7 @@
           const cleanBtn = document.createElement('button');
           cleanBtn.type = 'button';
           cleanBtn.className = 'card-btn card-btn-blue';
-          cleanBtn.textContent = 'Чистое';
+          cleanBtn.textContent = 'В чистое';
           on(cleanBtn, 'click', () => moveItemStatus(item.id, 'clean', 'Возвращено в «Чистое»', true));
           footer.appendChild(cleanBtn);
         }
@@ -3117,33 +3378,68 @@
         gridEl.appendChild(frag);
       }
 
-      function renderAll() {
-        const worn = state.items.filter(i => i.status === 'worn');
-        const cleanLight = state.items.filter(i => i.status === 'clean' && i.category === 'light');
-        const cleanDark = state.items.filter(i => i.status === 'clean' && i.category === 'dark');
-        const laundryLight = state.items.filter(i => i.status === 'laundry' && i.category === 'light');
-        const laundryDark = state.items.filter(i => i.status === 'laundry' && i.category === 'dark');
+      // Сортировка внутри цвета в корзине: строго ОТ ДАВНИХ К СВЕЖИМ (laundryAt || createdAt || 0 по возрастанию)
+      function sortByLaundryOldestFirst(list) {
+        return list.slice().sort((a, b) => {
+          const ta = Number(a.laundryAt) || Number(a.createdAt) || 0;
+          const tb = Number(b.laundryAt) || Number(b.createdAt) || 0;
+          return ta - tb;
+        });
+      }
 
-        const totalClean = worn.length + cleanLight.length + cleanDark.length;
+      function renderAll() {
+        const wearingToday = state.items.filter(i => i.status === 'wearing' && i.wearMode !== 'multi');
+        const wearingInUse = state.items.filter(i => i.status === 'wearing' && i.wearMode === 'multi');
+        const cleanLight = state.items.filter(i => i.status === 'clean' && i.color === 'light');
+        const cleanDark = state.items.filter(i => i.status === 'clean' && i.color === 'dark');
+        const laundryLight = sortByLaundryOldestFirst(state.items.filter(i => i.status === 'laundry' && i.color === 'light'));
+        const laundryDark = sortByLaundryOldestFirst(state.items.filter(i => i.status === 'laundry' && i.color === 'dark'));
+
+        const totalClean = wearingToday.length + wearingInUse.length + cleanLight.length + cleanDark.length;
         const totalLaundry = laundryLight.length + laundryDark.length;
 
         els.cleanBadge.textContent = String(totalClean);
         els.laundryBadge.textContent = String(totalLaundry);
 
-        // Блок «На мне сегодня»
-        if (worn.length > 0) {
+        // Верхний блок «На сегодня» + «В носке»
+        const hasToday = wearingToday.length > 0;
+        const hasInUse = wearingInUse.length > 0;
+
+        if (hasToday || hasInUse) {
           els.wearingPanel.classList.remove('hidden');
-          els.wearingCount.textContent = String(worn.length);
-          const todayKey = getLocalDateKey(Date.now());
-          const hasEarlier = worn.some(i => {
-            const itemDay = getLocalDateKey(i.selectedAt);
-            return Boolean(itemDay && itemDay !== todayKey);
-          });
-          els.morningNudge.classList.toggle('hidden', !hasEarlier);
-          renderGrid(els.wearingGrid, null, worn, 'worn');
+
+          if (hasToday) {
+            els.todaySection.classList.remove('hidden');
+            els.todayCount.textContent = String(wearingToday.length);
+            els.todayToLaundryBtn.textContent = `В стирку (${wearingToday.length})`;
+
+            // Утреннее напоминание — ТОЛЬКО для однодневных вещей, выбранных до сегодняшнего дня
+            const startOfToday = getStartOfLocalDay(Date.now());
+            const hasYesterdaySingle = wearingToday.some(i =>
+              Number.isFinite(Number(i.selectedAt)) && Number(i.selectedAt) < startOfToday
+            );
+            els.morningNudge.classList.toggle('hidden', !hasYesterdaySingle);
+            renderGrid(els.todayGrid, null, wearingToday, 'today');
+          } else {
+            els.todaySection.classList.add('hidden');
+            els.todayGrid.innerHTML = '';
+            els.morningNudge.classList.add('hidden');
+          }
+
+          els.wearingDivider.classList.toggle('hidden', !(hasToday && hasInUse));
+
+          if (hasInUse) {
+            els.inUseSection.classList.remove('hidden');
+            els.inUseCount.textContent = String(wearingInUse.length);
+            renderGrid(els.inUseGrid, null, wearingInUse, 'inUse');
+          } else {
+            els.inUseSection.classList.add('hidden');
+            els.inUseGrid.innerHTML = '';
+          }
         } else {
           els.wearingPanel.classList.add('hidden');
-          els.wearingGrid.innerHTML = '';
+          els.todayGrid.innerHTML = '';
+          els.inUseGrid.innerHTML = '';
         }
 
         // Вкладка «Чистое»
@@ -3185,7 +3481,7 @@
       }
 
       // =========================================================================
-      // 10. МОДАЛКА ДОБАВЛЕНИЯ / РЕДАКТИРОВАНИЯ ВЕЩИ
+      // 11. МОДАЛКА ДОБАВЛЕНИЯ / РЕДАКТИРОВАНИЯ ВЕЩИ
       // =========================================================================
       function renderStubSwatches() {
         els.itemStubGrid.innerHTML = '';
@@ -3198,8 +3494,8 @@
           btn.setAttribute('aria-label', swatch.label);
           on(btn, 'click', () => {
             state.formStubId = swatch.id;
-            state.formPhotoDataUrl = buildClothingPosterSvg(swatch);
-            state.formCategory = swatch.cat;
+            state.formPhotoDataUrl = buildStudioGarmentSvg(swatch);
+            state.formColor = swatch.color;
             els.itemPhotoPreview.src = state.formPhotoDataUrl;
             els.itemPhotoPreview.classList.remove('hidden');
             els.itemPhotoEmpty.classList.add('hidden');
@@ -3217,8 +3513,10 @@
       }
 
       function updateItemModalControls() {
-        els.itemCatLightBtn.className = state.formCategory === 'light' ? 'choice-btn active-light' : 'choice-btn';
-        els.itemCatDarkBtn.className = state.formCategory === 'dark' ? 'choice-btn active-dark' : 'choice-btn';
+        els.itemCatLightBtn.className = state.formColor === 'light' ? 'choice-btn active-light' : 'choice-btn';
+        els.itemCatDarkBtn.className = state.formColor === 'dark' ? 'choice-btn active-dark' : 'choice-btn';
+        els.itemModeSingleBtn.className = state.formWearMode !== 'multi' ? 'choice-btn active-mode' : 'choice-btn';
+        els.itemModeMultiBtn.className = state.formWearMode === 'multi' ? 'choice-btn active-mode' : 'choice-btn';
         document.querySelectorAll('[data-item-status]').forEach(btn => {
           btn.classList.toggle('active', btn.dataset.itemStatus === state.formStatus);
         });
@@ -3231,7 +3529,8 @@
       function openAddItemModal() {
         state.modalMode = 'add';
         state.editingId = null;
-        state.formCategory = 'light';
+        state.formColor = 'light';
+        state.formWearMode = 'single';
         state.formStatus = 'clean';
         state.formPhotoDataUrl = null;
         state.formStubId = null;
@@ -3266,14 +3565,15 @@
 
         state.modalMode = 'edit';
         state.editingId = item.id;
-        state.formCategory = item.category;
+        state.formColor = item.color;
+        state.formWearMode = item.wearMode === 'multi' ? 'multi' : 'single';
         state.formStatus = item.status;
         state.formPhotoDataUrl = item.photoDataUrl;
         state.formStubId = null;
         resetItemPhotoInput();
 
         els.itemModalTitle.textContent = 'Редактировать вещь';
-        els.itemModalSubtitle.textContent = 'Измените фото, цвет или статус';
+        els.itemModalSubtitle.textContent = 'Измените фото, цвет, режим носки или статус';
         els.itemSubmitBtn.textContent = 'Сохранить изменения';
         els.itemNameInput.value = item.name || '';
         els.itemPhotoPreview.src = item.photoDataUrl;
@@ -3324,7 +3624,7 @@
       }
 
       // =========================================================================
-      // 11. ЕЖЕДНЕВНЫЕ НАПОМИНАНИЯ (WEB PUSH ЧЕРЕЗ YANDEX CLOUD)
+      // 12. ЕЖЕДНЕВНЫЕ НАПОМИНАНИЯ (WEB PUSH ЧЕРЕЗ YANDEX CLOUD)
       // =========================================================================
       function urlBase64ToUint8Array(base64String) {
         const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
@@ -3337,7 +3637,7 @@
 
       function readPushSettingsLocal() {
         try {
-          const raw = localStorage.getItem(PUSH_SETTINGS_LS_KEY);
+          const raw = safeLSGet(PUSH_SETTINGS_LS_KEY);
           if (!raw) return null;
           const parsed = JSON.parse(raw);
           return parsed && typeof parsed === 'object' ? parsed : null;
@@ -3354,9 +3654,7 @@
           lastTzOffset: state.push.lastTzOffset,
           lastSyncAt: state.push.lastSyncAt || 0,
         };
-        try {
-          localStorage.setItem(PUSH_SETTINGS_LS_KEY, JSON.stringify(payload));
-        } catch {}
+        safeLSSet(PUSH_SETTINGS_LS_KEY, JSON.stringify(payload));
         await Storage.setMeta('pushConfig', payload);
       }
 
@@ -3544,13 +3842,11 @@
 
         try {
           const chosenTime = els.pushTimeInput.value || state.push.time || '21:00';
-          // Сначала гарантируем, что подписка сохранена на сервере
           let sub = await subscribePush(chosenTime, false);
 
           try {
             await postPushBackend({ action: 'test', subscription: sub.toJSON() });
           } catch (err) {
-            // При 404 или 410 переподписываемся и повторяем test ровно один раз
             if (err && (err.status === 404 || err.status === 410)) {
               setPushStatus('Обновляем подписку и повторяем тест…');
               sub = await subscribePush(chosenTime, err.status === 410);
@@ -3570,7 +3866,7 @@
         }
       }
 
-      // Автовосстановление протухшей подписки и тихая синхронизация (старт + visibilitychange, троттлинг 5 мин)
+      // Автовосстановление протухшей подписки (при старте и по visibilitychange, троттлинг 5 мин)
       async function syncPushSubscriptionIfNeeded(force = false) {
         try {
           if (isPreviewSandbox() || state.push.busy || !state.push.enabled) return;
@@ -3588,7 +3884,6 @@
           let sub = await reg.pushManager.getSubscription();
 
           if (!sub) {
-            // Подписка исчезла/протухла — тихо переподписываемся
             sub = await reg.pushManager.subscribe({
               userVisibleOnly: true,
               applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
@@ -3607,7 +3902,6 @@
             return;
           }
 
-          // Если сменился endpoint или часовой пояс — тихо обновляем сервер
           if (sub.endpoint !== state.push.lastEndpoint || Number(state.push.lastTzOffset) !== tzOffset) {
             await postPushBackend({
               action: 'subscribe',
@@ -3733,7 +4027,7 @@
       }
 
       // =========================================================================
-      // 12. РЕЗЕРВНАЯ КОПИЯ (ЭКСПОРТ И ИМПОРТ С ПРОВЕРКОЙ МЕТКИ APP)
+      // 13. РЕЗЕРВНАЯ КОПИЯ (ЭКСПОРТ И ИМПОРТ С ПРОВЕРКОЙ МЕТКИ APP)
       // =========================================================================
       function exportBackupJson() {
         els.backupErrText.classList.add('hidden');
@@ -3805,7 +4099,6 @@
             if (parsed && typeof parsed === 'object' && parsed.app === 'Мой Гардероб') {
               await applyImportedItems(sanitized);
             } else {
-              // Показываем встроенное предупреждение с возможностью всё равно импортировать
               state.pendingForceImportItems = sanitized;
               els.backupWarningBox.classList.remove('hidden');
             }
@@ -3818,23 +4111,19 @@
       }
 
       // =========================================================================
-      // 13. СИСТЕМА БЛОКИРОВКИ PIN (АТОМАРНОЕ ХРАНЕНИЕ + САМОИСЦЕЛЕНИЕ)
+      // 14. БЛОКИРОВКА PIN (АТОМАРНЫЙ JSON + СОЛЬ + ЗАЩИТА ОТ ВЕЧНОГО ЛОКА)
       // =========================================================================
       async function writePinConfigAtomic(cfg) {
         if (isValidPinConfig(cfg)) {
           const clean = { enabled: true, salt: cfg.salt, hash: cfg.hash };
           state.pinConfig = clean;
-          try {
-            localStorage.setItem(PIN_LS_KEY, JSON.stringify(clean));
-            localStorage.removeItem(LEGACY_PIN_FLAG);
-          } catch {}
+          safeLSSet(PIN_LS_KEY, JSON.stringify(clean));
+          safeLSRemove(LEGACY_PIN_FLAG);
           await Storage.setMeta('pinConfig', clean);
         } else {
           state.pinConfig = null;
-          try {
-            localStorage.removeItem(PIN_LS_KEY);
-            localStorage.removeItem(LEGACY_PIN_FLAG);
-          } catch {}
+          safeLSRemove(PIN_LS_KEY);
+          safeLSRemove(LEGACY_PIN_FLAG);
           await Storage.deleteMeta('pinConfig');
         }
         updatePinUI();
@@ -3866,7 +4155,7 @@
       }
 
       function openPinOverlay(flow) {
-        // Самоисцеление: никогда не открываем экран блокировки без валидного salt+hash
+        // Самоисцеление: никогда не блокируем пользователя без валидной пары salt+hash
         if ((flow === 'unlock' || flow === 'disable_verify' || flow === 'change_verify') && !isValidPinConfig(state.pinConfig)) {
           writePinConfigAtomic(null);
           closePinOverlay();
@@ -3980,7 +4269,7 @@
       }
 
       // =========================================================================
-      // 14. СТАТУС ХРАНИЛИЩА, PWA И ОКНО «ЗАЩИТА И ДАННЫЕ»
+      // 15. СТАТУС ХРАНИЛИЩА, PWA И ОКНО «ЗАЩИТА И ДАННЫЕ»
       // =========================================================================
       async function checkOrRequestPersist(userTriggered = false) {
         try {
@@ -4016,6 +4305,11 @@
           els.pwaModePill.className = 'pill pill-green';
           els.pwaModeDesc.textContent = 'Запущено с иконки — автоочистка iOS отключена.';
           els.shieldDot.classList.add('hidden');
+        } else if (isPreviewSandbox()) {
+          els.pwaModePill.textContent = 'Предпросмотр';
+          els.pwaModePill.className = 'pill pill-blue';
+          els.pwaModeDesc.textContent = 'Изолированный режим предпросмотра. На GitHub Pages данные сохранятся в IndexedDB.';
+          els.shieldDot.classList.add('hidden');
         } else {
           els.pwaModePill.textContent = 'В браузере';
           els.pwaModePill.className = 'pill pill-amber';
@@ -4037,8 +4331,7 @@
 
         const demoCount = state.items.filter(i => i.isDemo).length;
         els.demoPill.textContent = `${demoCount} шт.`;
-        els.removeDemoBtn.classList.toggle('hidden', demoCount === 0);
-        els.restoreDemoBtn.classList.toggle('hidden', demoCount > 0);
+        els.removeDemoBtn.disabled = demoCount === 0;
 
         els.pwaInstallBtn.classList.toggle('hidden', !state.deferredInstallPrompt || standalone);
       }
@@ -4061,10 +4354,9 @@
       }
 
       // =========================================================================
-      // 15. НАВИГАЦИЯ ПРИ КЛИКЕ НА PUSH-УВЕДОМЛЕНИЕ
+      // 16. НАВИГАЦИЯ ПРИ КЛИКЕ НА PUSH-УВЕДОМЛЕНИЕ
       // =========================================================================
       function navigateToCleanHome() {
-        // Закрываем все обычные модалки, но НИКОГДА не скрываем экран PIN-блокировки
         closeLightbox();
         closeItemModal();
         closeShieldModal();
@@ -4090,7 +4382,7 @@
       }
 
       // =========================================================================
-      // 16. СИНХРОННАЯ ПРИВЯЗКА ВСЕХ ОБРАБОТЧИКОВ (ДО ASYNC INIT)
+      // 17. СИНХРОННАЯ ПРИВЯЗКА ВСЕХ ОБРАБОТЧИКОВ (ДО ASYNC INIT)
       // =========================================================================
       function bindEventsSynchronously() {
         // Шапка
@@ -4101,13 +4393,13 @@
         on(els.editDoneBtn, 'click', () => setEditMode(false));
 
         // Массовые действия
-        on(els.allWearingToLaundryBtn, 'click', () => sendWornToLaundry(false));
-        on(els.morningNudgeBtn, 'click', () => sendWornToLaundry(true));
-        on(els.washAllLightBtn, 'click', () => washCategoryLaundry('light'));
-        on(els.washAllDarkBtn, 'click', () => washCategoryLaundry('dark'));
+        on(els.todayToLaundryBtn, 'click', () => sendTodayToLaundry(false));
+        on(els.morningNudgeBtn, 'click', () => sendTodayToLaundry(true));
+        on(els.washAllLightBtn, 'click', () => washColorLaundry('light'));
+        on(els.washAllDarkBtn, 'click', () => washColorLaundry('dark'));
         on(els.toastUndoBtn, 'click', performUndo);
 
-        // Свайп-пейджер + удобное перетаскивание мышью на десктопе
+        // Горизонтальный свайп-пейджер + перетаскивание мышью на десктопе
         let rafId = null;
         on(els.snapContainer, 'scroll', () => {
           if (rafId) return;
@@ -4169,8 +4461,10 @@
         on(els.closeItemModalBtn, 'click', closeItemModal);
         on(els.itemModal, 'click', (e) => { if (e.target === els.itemModal) closeItemModal(); });
         on(els.clearStubBtn, 'click', clearSelectedStub);
-        on(els.itemCatLightBtn, 'click', () => { state.formCategory = 'light'; updateItemModalControls(); });
-        on(els.itemCatDarkBtn, 'click', () => { state.formCategory = 'dark'; updateItemModalControls(); });
+        on(els.itemCatLightBtn, 'click', () => { state.formColor = 'light'; updateItemModalControls(); });
+        on(els.itemCatDarkBtn, 'click', () => { state.formColor = 'dark'; updateItemModalControls(); });
+        on(els.itemModeSingleBtn, 'click', () => { state.formWearMode = 'single'; updateItemModalControls(); });
+        on(els.itemModeMultiBtn, 'click', () => { state.formWearMode = 'multi'; updateItemModalControls(); });
         document.querySelectorAll('[data-item-status]').forEach(btn => {
           on(btn, 'click', () => {
             state.formStatus = btn.dataset.itemStatus;
@@ -4216,7 +4510,8 @@
             const newItem = {
               id: `item_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
               name: els.itemNameInput.value.trim(),
-              category: state.formCategory,
+              color: state.formColor,
+              wearMode: state.formWearMode,
               status: 'clean',
               isDemo: false,
               photoDataUrl: state.formPhotoDataUrl,
@@ -4226,7 +4521,7 @@
             closeItemModal();
             scrollToTab(0, true);
             renderAll();
-            showToast(`Добавлено в «${newItem.category === 'light' ? 'Светлое' : 'Тёмное'}»`, false);
+            showToast(`Добавлено в «${newItem.color === 'light' ? 'Светлое' : 'Тёмное'}»`, false);
             await saveItemsAndRefresh();
           } else {
             const idx = state.items.findIndex(i => i.id === state.editingId);
@@ -4236,14 +4531,20 @@
             const next = {
               ...prev,
               name: els.itemNameInput.value.trim(),
-              category: state.formCategory,
+              color: state.formColor,
+              wearMode: state.formWearMode,
               status: state.formStatus,
               photoDataUrl: state.formPhotoDataUrl || prev.photoDataUrl,
             };
-            if (next.status === 'worn') {
-              next.selectedAt = prev.selectedAt || Date.now();
+            if (next.status === 'wearing') {
+              next.selectedAt = (prev.status === 'wearing' && prev.selectedAt) ? prev.selectedAt : Date.now();
+              delete next.laundryAt;
+            } else if (next.status === 'laundry') {
+              next.laundryAt = (prev.status === 'laundry' && prev.laundryAt) ? prev.laundryAt : Date.now();
+              delete next.selectedAt;
             } else {
               delete next.selectedAt;
+              delete next.laundryAt;
             }
             state.items[idx] = next;
             closeItemModal();
@@ -4282,7 +4583,7 @@
           updateShieldStatusUI();
         });
 
-        // Push-уведомления
+        // Push
         on(els.pushToggleBtn, 'click', handlePushToggle);
         on(els.savePushTimeBtn, 'click', handleSavePushTime);
         on(els.testPushBtn, 'click', testPush);
@@ -4351,7 +4652,7 @@
           if (state.pinFlow !== 'unlock') closePinOverlay();
         });
 
-        // PWA установка на Android
+        // Установка PWA (Android / Desktop)
         on(window, 'beforeinstallprompt', (e) => {
           e.preventDefault();
           state.deferredInstallPrompt = e;
@@ -4372,14 +4673,14 @@
           if (state.pinFlow && state.pinFlow !== 'unlock') closePinOverlay();
         });
 
-        // Автовосстановление Push при возврате на вкладку (троттлинг 5 мин)
+        // Тихая синхронизация Push при возврате на вкладку
         on(document, 'visibilitychange', () => {
           if (document.visibilityState === 'visible') {
             syncPushSubscriptionIfNeeded(false);
           }
         });
 
-        // Навигация при клике на пуш, когда приложение уже открыто
+        // Навигация на «Чистое» при клике по уведомлению, когда приложение уже открыто
         if (!isPreviewSandbox()) {
           try {
             navigator.serviceWorker.addEventListener('message', (event) => {
@@ -4394,13 +4695,13 @@
       }
 
       // =========================================================================
-      // 17. ИНИЦИАЛИЗАЦИЯ ДАННЫХ И ЗАПУСК
+      // 18. АСИНХРОННАЯ ПОДГРУЗКА ДАННЫХ И МОМЕНТАЛЬНЫЙ ЗАПУСК
       // =========================================================================
       async function initAppData() {
         try {
           await Storage.init();
 
-          // Атомарное согласование PIN между localStorage и IndexedDB (без риска вечного лока)
+          // Атомарное согласование PIN (без риска вечного лока)
           const lsPin = readPinFromLocalStorage();
           const metaPinRaw = await Storage.getMeta('pinConfig');
           const metaPin = isValidPinConfig(metaPinRaw) ? metaPinRaw : null;
@@ -4416,7 +4717,7 @@
             closePinOverlay();
           }
 
-          // Загрузка вещей и стартовый сидинг 6 демо-карточек (3 светлые + 3 тёмные)
+          // Загрузка вещей из хранилища или первичный сидинг демо-вещей
           const seeded = await Storage.getMeta('seeded');
           const savedItems = await Storage.getAllItems();
 
@@ -4450,21 +4751,20 @@
         attachAppleTouchIcon();
         registerServiceWorkerSafely();
 
-        // Убираем устаревший раздельный флаг PIN
-        try { localStorage.removeItem(LEGACY_PIN_FLAG); } catch {}
+        safeLSRemove(LEGACY_PIN_FLAG);
         const initialLsPin = readPinFromLocalStorage();
         if (isValidPinConfig(initialLsPin)) {
           state.pinConfig = initialLsPin;
           openPinOverlay('unlock');
         }
 
-        // Синхронно привязываем все кнопки и сразу показываем демо-карточки до загрузки БД
+        // Синхронно вешаем события и сразу рисуем демо-данные, чтобы экран никогда не был пустым
         bindEventsSynchronously();
         state.items = createDemoItems();
         updateTabVisuals(0);
         renderAll();
 
-        // Асинхронная подгрузка локальной базы и синхронизация Push/PIN
+        // Подтягиваем реальные локальные данные и настройки
         initAppData();
       }
 
