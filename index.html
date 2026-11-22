@@ -1,0 +1,2781 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+
+  <!-- PWA мета-теги для iOS и Android -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Мой Гардероб" />
+  <meta name="application-name" content="Мой Гардероб" />
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="format-detection" content="telephone=no" />
+  <title>Мой Гардероб</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Crect width='120' height='120' rx='28' fill='%230f172a'/%3E%3Cpath d='M44 28 L25 37 L16 70 L29 74 L37 54 L37 96 L83 96 L83 54 L91 74 L104 70 L95 37 L76 28 C70 38, 50 38, 44 28 Z' fill='%2322c55e' stroke='%23ffffff' stroke-width='3' stroke-linejoin='round'/%3E%3C/svg%3E" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Шрифт Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* Базовые настройки мобильного PWA */
+    html, body {
+      height: 100%;
+      overscroll-behavior-x: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Учёт безопасных отступов на iPhone / Android с вырезом и нижней полосой */
+    .safe-top {
+      padding-top: max(0.625rem, env(safe-area-inset-top));
+    }
+    .safe-bottom {
+      padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+
+    /* Скрытие полос прокрутки */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Горизонтальный scroll-snap контейнер — нативный свайп без конфликтов с вертикальным скроллом */
+    .snap-container {
+      display: flex;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-x: contain;
+    }
+    .snap-pane {
+      flex: 0 0 100%;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      scroll-snap-align: start;
+      scroll-snap-stop: always;
+      overscroll-behavior-y: contain;
+    }
+
+    /* Анимация появления карточек */
+    @keyframes cardPopIn {
+      0% {
+        opacity: 0;
+        transform: scale(0.93) translateY(6px);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+    }
+    .animate-card-pop {
+      animation: cardPopIn 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    /* Анимация модальных окон */
+    @keyframes fadeOverlay {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @keyframes slideSheetUp {
+      from { opacity: 0; transform: translateY(20px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .modal-backdrop {
+      animation: fadeOverlay 0.16s ease-out both;
+    }
+    .modal-sheet {
+      animation: slideSheetUp 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+
+    /* Лёгкий акцент карточек в режиме правки */
+    @keyframes editBorderPulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(15, 23, 42, 0.12); }
+      50% { box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22); }
+    }
+    .edit-mode-card {
+      animation: editBorderPulse 2.2s ease-in-out infinite;
+    }
+
+    /* Анимация встряхивания при неверном PIN */
+    @keyframes pinShake {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-8px); }
+      40% { transform: translateX(8px); }
+      60% { transform: translateX(-6px); }
+      80% { transform: translateX(6px); }
+    }
+    .animate-pin-shake {
+      animation: pinShake 0.36s ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-200/80 text-slate-900 font-sans antialiased sm:py-4 flex justify-center items-start min-h-screen overflow-x-hidden">
+
+  <!-- Мобильная оболочка приложения -->
+  <div id="appShell" class="relative w-full max-w-[430px] h-[100dvh] sm:h-[calc(100dvh-2rem)] sm:max-h-[890px] bg-slate-50 sm:rounded-[32px] sm:shadow-2xl sm:border sm:border-slate-300/80 flex flex-col overflow-hidden select-none">
+
+    <!-- ===================== 1. ЗАКРЕПЛЁННАЯ ВЕРХНЯЯ ШАПКА ===================== -->
+    <header class="shrink-0 bg-white/95 backdrop-blur-md border-b border-slate-200/90 px-2 sm:px-3 pb-2 safe-top z-20">
+      <div class="flex items-center justify-between gap-2">
+
+        <!-- Слева: только иконка щита («Защита и данные») с точкой-индикатором -->
+        <button
+          id="protectionBtn"
+          type="button"
+          aria-label="Защита и данные"
+          title="Защита и данные"
+          class="relative w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200/80 active:scale-95 transition flex items-center justify-center border border-slate-200/90 text-slate-800 shrink-0"
+        >
+          <!-- Иконка щита -->
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.1">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v5c0 4.97-3.05 9.19-7 10.5C8.05 20.19 5 15.97 5 11V6l7-3z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 12.2l1.8 1.8 3.6-3.8" />
+          </svg>
+          <!-- Маленькая точка-индикатор (появляется, если давно не делался бэкап или открыто не в PWA) -->
+          <span id="protectionAlertDot" class="hidden absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-white bg-amber-500"></span>
+        </button>
+
+        <!-- По центру: Вкладки «Чистое» и «В стирке» с плавным индикатором -->
+        <div class="relative flex-1 min-w-0 bg-slate-100 p-0.5 sm:p-1 rounded-xl border border-slate-200/80">
+          <div
+            id="tabPillIndicator"
+            class="absolute top-0.5 bottom-0.5 left-0.5 sm:top-1 sm:bottom-1 sm:left-1 w-[calc(50%-2px)] sm:w-[calc(50%-4px)] bg-white rounded-[10px] shadow-xs border border-slate-200/70 pointer-events-none will-change-transform"
+          ></div>
+
+          <div class="relative grid grid-cols-2">
+            <button
+              id="tabCleanBtn"
+              type="button"
+              class="relative z-10 py-1.5 sm:py-2 px-1 text-[12px] font-bold rounded-[10px] transition-colors flex items-center justify-center gap-1.5 text-slate-900 whitespace-nowrap"
+            >
+              <span>Чистое</span>
+              <span id="cleanCountBadge" class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-extrabold rounded-full bg-emerald-100 text-emerald-700">0</span>
+            </button>
+            <button
+              id="tabLaundryBtn"
+              type="button"
+              class="relative z-10 py-1.5 sm:py-2 px-1 text-[12px] font-bold rounded-[10px] transition-colors flex items-center justify-center gap-1.5 text-slate-500 whitespace-nowrap"
+            >
+              <span>В стирке</span>
+              <span id="laundryCountBadge" class="inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-extrabold rounded-full bg-slate-200/90 text-slate-500">0</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Справа: Кнопка «+» -->
+        <button
+          id="addBtn"
+          type="button"
+          aria-label="Добавить новую вещь"
+          class="w-10 h-10 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-95 text-white shadow-sm transition flex items-center justify-center shrink-0"
+        >
+          <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 5v14M5 12h14" />
+          </svg>
+        </button>
+      </div>
+
+      <!-- Компактная панель-баннер режима «Править» с заметной кнопкой «Готово» -->
+      <div id="editModeBanner" class="hidden mt-2 px-3 py-2 rounded-xl bg-slate-900 text-white flex items-center justify-between gap-2 shadow-sm">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0 animate-pulse"></span>
+          <p class="text-[11px] sm:text-xs font-semibold leading-tight text-slate-100">
+            Режим правки: смена цвета в 1 тап, ✎ — редактировать
+          </p>
+        </div>
+        <button
+          id="bannerDoneBtn"
+          type="button"
+          class="shrink-0 px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-slate-950 active:scale-95 text-xs font-extrabold transition shadow-xs"
+        >
+          Готово
+        </button>
+      </div>
+    </header>
+
+    <!-- ===================== 2. ГОРИЗОНТАЛЬНЫЙ SCROLL-SNAP КОНТЕЙНЕР ===================== -->
+    <main id="snapContainer" class="flex-1 snap-container no-scrollbar">
+
+      <!-- ========== ЭКРАН 1: «ЧИСТОЕ» ========== -->
+      <section
+        id="cleanPane"
+        class="snap-pane no-scrollbar px-2 sm:px-2.5 pt-3 pb-24"
+        aria-label="Чистая одежда"
+      >
+        <!-- Верхний закреплённый блок «На мне сегодня» (скрыт, пока ничего не выбрано) -->
+        <div id="wearingSection" class="hidden mb-4 rounded-2xl bg-gradient-to-b from-amber-50/95 to-orange-50/70 border-2 border-amber-300/90 p-2 shadow-xs">
+          <div class="flex items-center justify-between gap-2 mb-2 px-0.5">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+              <h2 class="text-sm font-extrabold text-slate-900 tracking-tight">На мне сегодня</h2>
+              <span id="wearingCountText" class="text-[11px] font-extrabold text-amber-900 bg-amber-200/80 px-1.5 py-0.5 rounded-full">0</span>
+            </div>
+            <!-- Показывается, когда выбрано 2 и более вещей -->
+            <button
+              id="allToLaundryBtn"
+              type="button"
+              class="hidden px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 active:scale-95 text-white text-[11px] font-extrabold shadow-xs transition"
+            >
+              Всё в стирку
+            </button>
+          </div>
+          <!-- Сетка строго 3 в ряд -->
+          <div id="wearingGrid" class="grid grid-cols-3 gap-1.5 sm:gap-2"></div>
+        </div>
+
+        <!-- Секция: СВЕТЛОЕ (Чистое) -->
+        <div class="mb-5">
+          <div class="flex items-center justify-between px-1 mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-4 h-4 rounded-full bg-amber-50 border-2 border-amber-400 inline-block shrink-0"></span>
+              <h2 class="text-[15px] font-extrabold text-slate-900">Светлое</h2>
+              <span id="cleanLightCount" class="text-xs font-bold text-slate-400">0</span>
+            </div>
+          </div>
+          <div id="cleanLightGrid" class="grid grid-cols-3 gap-1.5 sm:gap-2"></div>
+          <div id="cleanLightEmpty" class="hidden rounded-2xl border-2 border-dashed border-slate-300 bg-white/80 py-6 px-4 text-center text-xs text-slate-400 font-medium">
+            Чистых светлых вещей сейчас нет
+          </div>
+        </div>
+
+        <!-- Секция: ТЁМНОЕ (Чистое) -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between px-1 mb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-4 h-4 rounded-full bg-slate-900 border-2 border-slate-700 inline-block shrink-0"></span>
+              <h2 class="text-[15px] font-extrabold text-slate-900">Тёмное</h2>
+              <span id="cleanDarkCount" class="text-xs font-bold text-slate-400">0</span>
+            </div>
+          </div>
+          <div id="cleanDarkGrid" class="grid grid-cols-3 gap-1.5 sm:gap-2"></div>
+          <div id="cleanDarkEmpty" class="hidden rounded-2xl border-2 border-dashed border-slate-300 bg-white/80 py-6 px-4 text-center text-xs text-slate-400 font-medium">
+            Чистых тёмных вещей сейчас нет
+          </div>
+        </div>
+
+        <!-- Подсказка о жесте -->
+        <div class="pt-1 pb-4 flex justify-center">
+          <p class="text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
+            <span>Свайп влево</span>
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+            <span>перейти в «В стирке»</span>
+          </p>
+        </div>
+      </section>
+
+      <!-- ========== ЭКРАН 2: «В СТИРКЕ» ========== -->
+      <section
+        id="laundryPane"
+        class="snap-pane no-scrollbar px-2 sm:px-2.5 pt-3 pb-24"
+        aria-label="Вещи в стирке"
+      >
+        <!-- Пустая корзина -->
+        <div id="laundryAllEmpty" class="hidden mt-8 mx-1 rounded-3xl bg-white border-2 border-slate-200 p-7 text-center shadow-xs">
+          <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <h3 class="text-base font-extrabold text-slate-900 mb-1">В стирке пусто</h3>
+          <p class="text-xs text-slate-500 leading-relaxed">Вся одежда сейчас чистая и находится на вкладке «Чистое».</p>
+        </div>
+
+        <div id="laundrySectionsContainer">
+          <!-- Секция: СВЕТЛОЕ (В стирке) -->
+          <div class="mb-5">
+            <div class="flex items-center justify-between px-1 mb-2 gap-2">
+              <div class="flex items-center gap-2">
+                <span class="w-4 h-4 rounded-full bg-amber-50 border-2 border-amber-400 inline-block shrink-0"></span>
+                <h2 class="text-[15px] font-extrabold text-slate-900">Светлое</h2>
+                <span id="laundryLightCount" class="text-xs font-bold text-slate-400">0</span>
+              </div>
+              <button
+                id="washAllLightBtn"
+                type="button"
+                class="hidden px-2.5 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-600 active:scale-95 text-white text-[11px] font-extrabold shadow-xs transition flex items-center gap-1"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Постирано всё</span>
+              </button>
+            </div>
+            <div id="laundryLightGrid" class="grid grid-cols-3 gap-1.5 sm:gap-2"></div>
+            <div id="laundryLightEmpty" class="hidden rounded-2xl border-2 border-dashed border-slate-300 bg-white/80 py-5 px-4 text-center text-xs text-slate-400 font-medium">
+              Светлых вещей в стирке нет
+            </div>
+          </div>
+
+          <!-- Секция: ТЁМНОЕ (В стирке) -->
+          <div class="mb-6">
+            <div class="flex items-center justify-between px-1 mb-2 gap-2">
+              <div class="flex items-center gap-2">
+                <span class="w-4 h-4 rounded-full bg-slate-900 border-2 border-slate-700 inline-block shrink-0"></span>
+                <h2 class="text-[15px] font-extrabold text-slate-900">Тёмное</h2>
+                <span id="laundryDarkCount" class="text-xs font-bold text-slate-400">0</span>
+              </div>
+              <button
+                id="washAllDarkBtn"
+                type="button"
+                class="hidden px-2.5 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-600 active:scale-95 text-white text-[11px] font-extrabold shadow-xs transition flex items-center gap-1"
+              >
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                <span>Постирано всё</span>
+              </button>
+            </div>
+            <div id="laundryDarkGrid" class="grid grid-cols-3 gap-1.5 sm:gap-2"></div>
+            <div id="laundryDarkEmpty" class="hidden rounded-2xl border-2 border-dashed border-slate-300 bg-white/80 py-5 px-4 text-center text-xs text-slate-400 font-medium">
+              Тёмных вещей в стирке нет
+            </div>
+          </div>
+        </div>
+
+        <div class="pt-1 pb-4 flex justify-center">
+          <p class="text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span>Свайп вправо — вернуться в «Чистое»</span>
+          </p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ===================== TOAST-УВЕДОМЛЕНИЕ (3.5 СЕК + ОТМЕНИТЬ) ===================== -->
+    <div id="toastContainer" class="pointer-events-none absolute inset-x-3 bottom-0 safe-bottom z-40 flex justify-center">
+      <div
+        id="toastBox"
+        class="pointer-events-auto hidden items-center justify-between gap-3 bg-slate-900/95 backdrop-blur-md text-white px-4 py-3 rounded-2xl shadow-xl border border-slate-700/80 max-w-full w-full sm:w-auto sm:min-w-[295px]"
+      >
+        <span id="toastMessage" class="text-xs font-semibold leading-snug">Готово</span>
+        <button
+          id="toastUndoBtn"
+          type="button"
+          class="hidden shrink-0 text-xs font-extrabold text-emerald-400 hover:text-emerald-300 active:scale-95 px-2.5 py-1 rounded-lg bg-white/10 transition"
+        >
+          Отменить
+        </button>
+      </div>
+    </div>
+
+    <!-- ===================== МОДАЛЬНОЕ ОКНО: ДОБАВИТЬ ВЕЩЬ (+) ===================== -->
+    <div id="addModal" class="hidden absolute inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/55 backdrop-blur-[2px] p-3 modal-backdrop">
+      <div class="w-full max-w-[404px] bg-white rounded-3xl p-5 shadow-2xl border-2 border-slate-900/10 modal-sheet max-h-[92%] overflow-y-auto no-scrollbar">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-extrabold text-slate-900">Добавить вещь</h3>
+          <button
+            id="closeAddModalBtn"
+            type="button"
+            aria-label="Закрыть"
+            class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center active:scale-95 transition"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form id="addItemForm" class="space-y-4">
+          <!-- Камера или галерея -->
+          <div>
+            <label
+              for="addPhotoInput"
+              class="relative block w-full aspect-[4/3] rounded-2xl border-2 border-dashed border-slate-300 hover:border-emerald-500 bg-slate-50 cursor-pointer overflow-hidden transition group"
+            >
+              <input id="addPhotoInput" type="file" accept="image/*" class="sr-only" />
+              <div id="addPhotoPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-2.5 group-hover:scale-105 transition">
+                  <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                </div>
+                <p class="text-sm font-bold text-slate-800">Снять фото или выбрать из галереи</p>
+                <p class="text-[11px] text-slate-500 mt-1 leading-snug">Автосжатие до 700px (JPEG) • GPS и EXIF стираются автоматически</p>
+              </div>
+              <img id="addPhotoPreviewImg" alt="Превью вещи" class="hidden w-full h-full object-cover" />
+              <div id="addPhotoMetaBadge" class="hidden absolute bottom-2 right-2 px-2.5 py-1 rounded-lg bg-slate-900/80 text-white text-[11px] font-semibold backdrop-blur-xs"></div>
+              <div id="addPhotoRetakeHint" class="hidden absolute top-2 right-2 px-2.5 py-1 rounded-lg bg-white/95 text-slate-800 text-[11px] font-bold shadow-sm">
+                Заменить
+              </div>
+            </label>
+            <p id="addPhotoErrorMsg" class="hidden mt-1.5 text-xs font-semibold text-rose-600"></p>
+          </div>
+
+          <!-- Выбор цвета -->
+          <div>
+            <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Цвет для стирки</span>
+            <div class="grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                id="addCatLightBtn"
+                class="py-3 px-3 rounded-2xl border-2 border-slate-900 bg-amber-50 text-slate-900 font-extrabold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition"
+              >
+                <span class="w-4 h-4 rounded-full bg-white border-2 border-amber-400 shrink-0"></span>
+                <span>Светлое</span>
+              </button>
+              <button
+                type="button"
+                id="addCatDarkBtn"
+                class="py-3 px-3 rounded-2xl border-2 border-slate-200 bg-white text-slate-500 font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition"
+              >
+                <span class="w-4 h-4 rounded-full bg-slate-900 border-2 border-slate-700 shrink-0"></span>
+                <span>Тёмное</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Название -->
+          <div>
+            <label for="addItemNameInput" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+              Название <span class="normal-case font-medium text-slate-400">(необязательно)</span>
+            </label>
+            <input
+              id="addItemNameInput"
+              type="text"
+              maxlength="32"
+              placeholder="Например: Белая футболка"
+              class="w-full px-3.5 py-3 rounded-2xl border-2 border-slate-200 bg-slate-50 focus:bg-white focus:border-slate-900 focus:outline-none text-sm font-medium text-slate-900 transition"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="w-full py-3.5 rounded-2xl bg-[#16a34a] hover:bg-[#15803d] active:scale-[0.99] text-white font-extrabold text-sm shadow-md shadow-emerald-600/20 border-2 border-slate-900 transition"
+          >
+            Добавить в шкаф
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===================== МОДАЛЬНОЕ ОКНО: РЕДАКТИРОВАНИЕ ВЕЩИ (✎) ===================== -->
+    <div id="editItemModal" class="hidden absolute inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/55 backdrop-blur-[2px] p-3 modal-backdrop">
+      <div class="w-full max-w-[404px] bg-white rounded-3xl p-5 shadow-2xl border-2 border-slate-900/10 modal-sheet max-h-[92%] overflow-y-auto no-scrollbar">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-extrabold text-slate-900">Редактировать вещь</h3>
+          <button
+            id="closeEditItemModalBtn"
+            type="button"
+            aria-label="Закрыть"
+            class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center active:scale-95 transition"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <form id="editItemForm" class="space-y-4">
+          <!-- Текущее фото + замена -->
+          <div>
+            <label
+              for="editPhotoInput"
+              class="relative block w-full aspect-[4/3] rounded-2xl border-2 border-slate-800/80 bg-slate-50 cursor-pointer overflow-hidden group"
+            >
+              <input id="editPhotoInput" type="file" accept="image/*" class="sr-only" />
+              <div id="editPhotoSvgWrap" class="hidden w-full h-full flex items-center justify-center p-4"></div>
+              <img id="editPhotoPreviewImg" alt="Фото вещи" class="hidden w-full h-full object-cover" />
+              <div class="absolute bottom-2.5 inset-x-2.5 flex items-center justify-between pointer-events-none">
+                <span id="editPhotoMetaBadge" class="hidden px-2.5 py-1 rounded-lg bg-slate-900/80 text-white text-[11px] font-semibold backdrop-blur-xs"></span>
+                <span class="ml-auto px-3 py-1.5 rounded-xl bg-white/95 text-slate-900 text-xs font-extrabold shadow-md border border-slate-200 flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  <span>Заменить фото</span>
+                </span>
+              </div>
+            </label>
+            <p id="editPhotoErrorMsg" class="hidden mt-1.5 text-xs font-semibold text-rose-600"></p>
+          </div>
+
+          <!-- Переключатель цвета -->
+          <div>
+            <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Цвет для стирки</span>
+            <div class="grid grid-cols-2 gap-2.5">
+              <button
+                type="button"
+                id="editCatLightBtn"
+                class="py-3 px-3 rounded-2xl border-2 font-extrabold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition"
+              >
+                <span class="w-4 h-4 rounded-full bg-white border-2 border-amber-400 shrink-0"></span>
+                <span>Светлое</span>
+              </button>
+              <button
+                type="button"
+                id="editCatDarkBtn"
+                class="py-3 px-3 rounded-2xl border-2 font-extrabold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition"
+              >
+                <span class="w-4 h-4 rounded-full bg-slate-900 border-2 border-slate-600 shrink-0"></span>
+                <span>Тёмное</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Переключатель статуса -->
+          <div>
+            <span class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Статус</span>
+            <div class="grid grid-cols-3 gap-2">
+              <button type="button" data-edit-status="clean" class="py-2.5 px-2 rounded-xl border-2 text-xs font-bold transition active:scale-95">Чистое</button>
+              <button type="button" data-edit-status="wearing" class="py-2.5 px-2 rounded-xl border-2 text-xs font-bold transition active:scale-95">На мне</button>
+              <button type="button" data-edit-status="laundry" class="py-2.5 px-2 rounded-xl border-2 text-xs font-bold transition active:scale-95">В стирке</button>
+            </div>
+          </div>
+
+          <!-- Название -->
+          <div>
+            <label for="editItemNameInput" class="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">
+              Название <span class="normal-case font-medium text-slate-400">(необязательно)</span>
+            </label>
+            <input
+              id="editItemNameInput"
+              type="text"
+              maxlength="32"
+              placeholder="Например: Чёрное худи"
+              class="w-full px-3.5 py-3 rounded-2xl border-2 border-slate-200 bg-slate-50 focus:bg-white focus:border-slate-900 focus:outline-none text-sm font-medium text-slate-900 transition"
+            />
+          </div>
+
+          <div class="flex items-center gap-2.5 pt-1">
+            <button
+              id="editDeleteBtn"
+              type="button"
+              class="px-4 py-3.5 rounded-2xl bg-rose-50 hover:bg-rose-100 text-rose-600 border-2 border-rose-200 font-extrabold text-sm active:scale-95 transition shrink-0"
+            >
+              Удалить
+            </button>
+            <button
+              type="submit"
+              class="flex-1 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-extrabold text-sm shadow-md transition"
+            >
+              Сохранить
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===================== МОДАЛЬНОЕ ОКНО: ЗАЩИТА И ДАННЫЕ ===================== -->
+    <div id="protectionModal" class="hidden absolute inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-900/55 backdrop-blur-[2px] p-3 modal-backdrop">
+      <div class="w-full max-w-[404px] bg-white rounded-3xl p-4 sm:p-5 shadow-2xl border-2 border-slate-900/10 modal-sheet max-h-[92%] overflow-y-auto no-scrollbar space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <div class="w-9 h-9 rounded-xl bg-slate-900 text-white flex items-center justify-center">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.1">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3l7 3v5c0 4.97-3.05 9.19-7 10.5C8.05 20.19 5 15.97 5 11V6l7-3z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.5 12.2l1.8 1.8 3.6-3.8" />
+              </svg>
+            </div>
+            <div>
+              <h3 class="text-base font-extrabold text-slate-900 leading-tight">Защита и данные</h3>
+              <p class="text-[11px] font-medium text-slate-500">100% локально • фото не уходят в сеть</p>
+            </div>
+          </div>
+          <button
+            id="closeProtectionModalBtn"
+            type="button"
+            aria-label="Закрыть"
+            class="w-9 h-9 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center active:scale-95 transition"
+          >
+            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- СЕКЦИЯ 1: СТАТУС PWA И ПОСТОЯННОЕ ХРАНИЛИЩЕ (INDEXEDDB) -->
+        <div id="pwaStatusCard" class="rounded-2xl border p-3.5 space-y-2.5">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span id="pwaStatusDot" class="w-2.5 h-2.5 rounded-full shrink-0 mt-0.5"></span>
+              <div>
+                <p id="pwaStatusTitle" class="text-xs font-extrabold text-slate-900"></p>
+                <p id="pwaStatusDesc" class="text-[11px] text-slate-600 leading-snug mt-0.5"></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Нативная кнопка установки на Android (если перехвачен beforeinstallprompt) -->
+          <button
+            id="nativeInstallBtn"
+            type="button"
+            class="hidden w-full py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white text-xs font-extrabold flex items-center justify-center gap-2 shadow-xs transition"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" />
+            </svg>
+            <span>Установить приложение на экран</span>
+          </button>
+
+          <!-- Пошаговая инструкция установки для iPhone и Android (показывается, если открыто в обычной вкладке) -->
+          <div id="pwaInstallGuide" class="hidden space-y-2 pt-1">
+            <div class="rounded-xl bg-white/90 border border-amber-200/80 p-2.5 text-[11px] text-slate-700 leading-relaxed">
+              <p class="font-extrabold text-amber-900 mb-1">Важно для iPhone (Safari):</p>
+              <p>Если открывать сайт просто во вкладке и не заходить <strong>7 дней</strong>, Safari может очистить базу. После добавления на экран «Домой» автоочистка отключается.</p>
+            </div>
+            <div class="grid grid-cols-1 gap-1.5 text-[11px] text-slate-700">
+              <div class="rounded-xl bg-white border border-slate-200/80 p-2.5">
+                <p class="font-extrabold text-slate-900 mb-0.5">iPhone (Safari)</p>
+                <p class="leading-snug">Нажмите <strong>«Поделиться»</strong> (квадрат со стрелкой вверх) → пролистайте вниз → <strong>«На экран „Домой“»</strong> → «Добавить».</p>
+              </div>
+              <div class="rounded-xl bg-white border border-slate-200/80 p-2.5">
+                <p class="font-extrabold text-slate-900 mb-0.5">Android (Chrome)</p>
+                <p class="leading-snug">Нажмите меню <strong>⋮</strong> в правом верхнем углу → <strong>«Добавить на главный экран»</strong> (или «Установить приложение»).</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. ПОСТОЯННОЕ ХРАНИЛИЩЕ И ПАМЯТЬ -->
+        <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3.5 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <p class="text-xs font-extrabold text-slate-900">Постоянное хранилище</p>
+              <p id="persistStatusDesc" class="text-[11px] text-slate-500 mt-0.5">Проверяем статус IndexedDB…</p>
+            </div>
+            <span id="persistStatusBadge" class="shrink-0 px-2 py-1 rounded-lg text-[10px] font-extrabold bg-slate-200 text-slate-700">Проверка</span>
+          </div>
+
+          <button
+            id="checkPersistBtn"
+            type="button"
+            class="w-full py-2.5 px-3 rounded-xl bg-white hover:bg-slate-100 active:scale-[0.98] border border-slate-300 text-slate-800 text-xs font-bold transition"
+          >
+            Проверить / Включить защиту хранилища
+          </button>
+
+          <!-- Индикатор занятой памяти -->
+          <div class="pt-2 border-t border-slate-200/80 space-y-1.5">
+            <div class="flex items-center justify-between text-[11px]">
+              <span class="font-bold text-slate-600">Занято памяти на телефоне</span>
+              <span id="storageUsageText" class="font-extrabold text-slate-900">—</span>
+            </div>
+            <div class="w-full h-2 rounded-full bg-slate-200 overflow-hidden">
+              <div id="storageUsageBar" class="h-full rounded-full bg-emerald-500 transition-all duration-300" style="width: 4%"></div>
+            </div>
+            <div class="flex items-center justify-between text-[10px] text-slate-500 font-medium">
+              <span id="storageItemsCountText">Вещей: 0</span>
+              <span id="storageQuotaText">Доступно: —</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- СЕКЦИЯ 2: РЕЗЕРВНАЯ КОПИЯ (БЭКАП) -->
+        <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3.5 space-y-3">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <p class="text-xs font-extrabold text-slate-900">Резервная копия</p>
+              <p id="backupMetaText" class="text-[11px] text-slate-500 mt-0.5">Последний бэкап: ещё не делался</p>
+            </div>
+            <span id="backupChangesBadge" class="shrink-0 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-200 text-slate-700">0 изм.</span>
+          </div>
+
+          <!-- Мягкое умное напоминание (только внутри меню) -->
+          <div id="backupReminderBox" class="hidden rounded-xl bg-amber-50 border border-amber-200/90 p-2.5 flex items-start gap-2">
+            <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+            </svg>
+            <p id="backupReminderText" class="text-[11px] text-amber-900 font-medium leading-snug"></p>
+          </div>
+
+          <div class="grid grid-cols-1 gap-2">
+            <!-- Поделиться через Web Share API (Telegram Избранное / iCloud / Google Диск) -->
+            <button
+              id="shareBackupBtn"
+              type="button"
+              class="w-full py-3 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white text-xs font-extrabold flex items-center justify-center gap-2 transition shadow-xs"
+            >
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+              </svg>
+              <span>Поделиться копией (Telegram / Облако)</span>
+            </button>
+
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                id="downloadBackupBtn"
+                type="button"
+                class="py-2.5 px-2.5 rounded-xl bg-white hover:bg-slate-100 active:scale-[0.98] border border-slate-300 text-slate-800 text-[11px] font-bold flex items-center justify-center gap-1.5 transition"
+              >
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Скачать файл</span>
+              </button>
+
+              <label
+                for="restoreBackupInput"
+                class="py-2.5 px-2.5 rounded-xl bg-white hover:bg-slate-100 active:scale-[0.98] border border-slate-300 text-slate-800 text-[11px] font-bold flex items-center justify-center gap-1.5 cursor-pointer transition"
+              >
+                <input id="restoreBackupInput" type="file" accept="application/json,.json" class="sr-only" />
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                </svg>
+                <span>Восстановить</span>
+              </label>
+            </div>
+          </div>
+
+          <p id="backupErrorMsg" class="hidden text-[11px] font-semibold text-rose-600"></p>
+        </div>
+
+        <!-- СЕКЦИЯ 3: ПРАВКА (СТРОГО ПОСЛЕ РЕЗЕРВНОЙ КОПИИ И ПЕРЕД БЛОКИРОВКОЙ) -->
+        <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3.5 space-y-2.5">
+          <div class="flex items-start justify-between gap-2">
+            <div>
+              <p class="text-xs font-extrabold text-slate-900">Правка</p>
+              <p class="text-[11px] text-slate-500 mt-0.5 leading-snug">Смена цвета в 1 тап, правка фото и удаление вещей</p>
+            </div>
+            <span id="modalEditModeBadge" class="shrink-0 px-2 py-1 rounded-lg text-[10px] font-extrabold bg-slate-200 text-slate-600">Выкл</span>
+          </div>
+
+          <button
+            id="modalEditModeBtn"
+            type="button"
+            class="w-full py-3 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white text-xs font-extrabold flex items-center justify-center gap-2 transition shadow-xs"
+          >
+            <svg id="modalEditModeIcon" class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.3">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+            <span id="modalEditModeText">Править</span>
+          </button>
+        </div>
+
+        <!-- СЕКЦИЯ 4: БЛОКИРОВКА (ОПЦИОНАЛЬНЫЙ 4-ЗНАЧНЫЙ PIN-КОД) -->
+        <div class="rounded-2xl bg-slate-50 border border-slate-200 p-3.5 space-y-2.5">
+          <div class="flex items-center justify-between gap-2">
+            <div>
+              <p class="text-xs font-extrabold text-slate-900">Блокировка по PIN-коду</p>
+              <p id="pinStatusDesc" class="text-[11px] text-slate-500 mt-0.5">Выключен (вход без лишних нажатий)</p>
+            </div>
+            <span id="pinStatusBadge" class="shrink-0 px-2 py-1 rounded-lg text-[10px] font-extrabold bg-slate-200 text-slate-600">Выкл</span>
+          </div>
+
+          <div id="pinOffActions">
+            <button
+              id="enablePinBtn"
+              type="button"
+              class="w-full py-2.5 px-3 rounded-xl bg-white hover:bg-slate-100 active:scale-[0.98] border border-slate-300 text-slate-800 text-xs font-bold transition"
+            >
+              Включить 4-значный PIN-код
+            </button>
+          </div>
+
+          <div id="pinOnActions" class="hidden space-y-2">
+            <div class="grid grid-cols-2 gap-2">
+              <button
+                id="changePinBtn"
+                type="button"
+                class="py-2.5 px-2.5 rounded-xl bg-white hover:bg-slate-100 active:scale-[0.98] border border-slate-300 text-slate-800 text-[11px] font-bold transition"
+              >
+                Сменить PIN
+              </button>
+              <button
+                id="lockNowBtn"
+                type="button"
+                class="py-2.5 px-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white text-[11px] font-bold transition"
+              >
+                Заблокировать
+              </button>
+            </div>
+            <button
+              id="disablePinBtn"
+              type="button"
+              class="w-full py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-[11px] font-bold transition"
+            >
+              Отключить PIN-код
+            </button>
+          </div>
+        </div>
+
+        <!-- 5. ДЕМО-ВЕЩИ -->
+        <div class="space-y-2">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-1">Стартовые демо-вещи</p>
+          <div class="grid grid-cols-2 gap-2">
+            <button
+              id="removeDemoBtn"
+              type="button"
+              class="py-2.5 px-3 rounded-xl bg-rose-50 hover:bg-rose-100/80 border border-rose-200 text-rose-700 text-xs font-bold flex items-center justify-between active:scale-[0.98] transition"
+            >
+              <span>Удалить демо</span>
+              <span id="demoCountBadge" class="text-[10px] font-extrabold bg-rose-200/80 text-rose-800 px-1.5 py-0.5 rounded-full">0</span>
+            </button>
+            <button
+              id="resetDemoBtn"
+              type="button"
+              class="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200/80 border border-slate-200 text-slate-700 text-xs font-bold active:scale-[0.98] transition"
+            >
+              Вернуть демо
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ===================== ЭКРАН ВВОДА / НАСТРОЙКИ 4-ЗНАЧНОГО PIN-КОДА ===================== -->
+    <div id="pinOverlay" class="hidden absolute inset-0 z-[60] bg-white/98 backdrop-blur-md flex flex-col justify-between px-6 py-8 safe-top safe-bottom">
+      <!-- Верхняя кнопка отмены (скрыта в режиме блокировки при старте) -->
+      <div class="flex items-center justify-between min-h-[36px]">
+        <button
+          id="pinCancelBtn"
+          type="button"
+          class="hidden px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold active:scale-95 transition"
+        >
+          Отмена
+        </button>
+        <span class="mx-auto text-xs font-bold text-slate-400 uppercase tracking-widest">Мой Гардероб</span>
+        <span class="w-[68px]"></span>
+      </div>
+
+      <!-- Заголовок и 4 точки -->
+      <div class="flex flex-col items-center text-center my-auto">
+        <div class="w-14 h-14 rounded-2xl bg-slate-900 text-white flex items-center justify-center mb-4 shadow-md">
+          <svg class="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </div>
+        <h2 id="pinTitle" class="text-lg font-extrabold text-slate-900">Введите PIN-код</h2>
+        <p id="pinSubtitle" class="text-xs text-slate-500 mt-1 min-h-[18px]">Защита локального гардероба</p>
+
+        <div id="pinDotsRow" class="flex items-center justify-center gap-4 mt-6">
+          <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-300 bg-transparent transition-all"></span>
+          <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-300 bg-transparent transition-all"></span>
+          <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-300 bg-transparent transition-all"></span>
+          <span class="pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-300 bg-transparent transition-all"></span>
+        </div>
+        <p id="pinErrorText" class="text-xs font-bold text-rose-600 mt-3 min-h-[18px]"></p>
+      </div>
+
+      <!-- Чистая цифровая клавиатура -->
+      <div class="w-full max-w-[280px] mx-auto grid grid-cols-3 gap-3 pb-2">
+        <button type="button" data-pin-digit="1" class="h-14 rounded-2xl bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-xl font-extrabold text-slate-900 transition">1</button>
+        <button type="button" data-pin-digit="2" class="h-14 rounded-2xl bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-xl font-extrabold text-slate-900 transition">2</button>
+        <button type="button" data-pin-digit="3" class="h-14 rounded-2xl bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-xl font-extrabold text-slate-900 transition">3</button>
+        <button type="button" data-pin-digit="4" class="h-14 rounded-2xl bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-xl font-extrabold text-slate-900 transition">4</button>
+        <button type="button" data-pin-digit="5" class="h-14 rounded-2xl bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-xl font-extrabold text-slate-900 transition">5</button>
+        <button type="button" data-pin-digit="6" class="h-14 rounded-2xl bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-xl font-extrabold text-slate-900 transition">6</button>
+        <button type="button" data-pin-digit="7" class="h-14 rounded-2xl bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-xl font-extrabold text-slate-900 transition">7</button>
+        <button type="button" data-pin-digit="8" class="h-14 rounded-2xl bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-xl font-extrabold text-slate-900 transition">8</button>
+        <button type="button" data-pin-digit="9" class="h-14 rounded-2xl bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-xl font-extrabold text-slate-900 transition">9</button>
+        <div aria-hidden="true"></div>
+        <button type="button" data-pin-digit="0" class="h-14 rounded-2xl bg-slate-100 hover:bg-slate-200/80 active:scale-95 text-xl font-extrabold text-slate-900 transition">0</button>
+        <button
+          id="pinBackspaceBtn"
+          type="button"
+          aria-label="Стереть цифру"
+          class="h-14 rounded-2xl bg-slate-50 hover:bg-slate-200/70 active:scale-95 text-slate-700 flex items-center justify-center transition"
+        >
+          <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2M3 12l6.414-6.414A2 2 0 0110.828 5H19a2 2 0 012 2v10a2 2 0 01-2 2h-8.172a2 2 0 01-1.414-.586L3 12z" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===================== ЛОГИКА ПРИЛОЖЕНИЯ (100% ЛОКАЛЬНО) ===================== -->
+  <script>
+    (() => {
+      'use strict';
+
+      // =========================================================================
+      // 0. ДИНАМИЧЕСКИЙ WEB APP MANIFEST ДЛЯ УСТАНОВКИ PWA НА ANDROID И IOS
+      // =========================================================================
+      function attachInlineManifest() {
+        try {
+          const iconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="44" fill="#0f172a"/><path d="M70 44 L40 58 L26 112 L46 118 L59 86 L59 154 L133 154 L133 86 L146 118 L166 112 L152 58 L122 44 C112 60, 80 60, 70 44 Z" fill="#22c55e" stroke="#ffffff" stroke-width="5" stroke-linejoin="round"/></svg>`;
+          const iconBlob = new Blob([iconSvg], { type: 'image/svg+xml' });
+          const iconUrl = URL.createObjectURL(iconBlob);
+
+          const manifest = {
+            name: 'Мой Гардероб',
+            short_name: 'Гардероб',
+            description: 'Локальный трекер чистой и грязной одежды без облака',
+            start_url: '.',
+            display: 'standalone',
+            orientation: 'portrait',
+            background_color: '#f8fafc',
+            theme_color: '#ffffff',
+            lang: 'ru',
+            icons: [
+              { src: iconUrl, sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable' },
+              { src: iconUrl, sizes: '512x512', type: 'image/svg+xml', purpose: 'any maskable' },
+            ],
+          };
+          const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+          const manifestUrl = URL.createObjectURL(blob);
+          const link = document.createElement('link');
+          link.rel = 'manifest';
+          link.href = manifestUrl;
+          document.head.appendChild(link);
+        } catch (err) {
+          console.warn('Не удалось подключить manifest:', err);
+        }
+      }
+      attachInlineManifest();
+
+      // =========================================================================
+      // 1. 6 АККУРАТНЫХ SVG ДЕМО-ВЕЩЕЙ ПРИ ПЕРВОМ ЗАПУСКЕ
+      // =========================================================================
+      const DEMO_ITEMS_TEMPLATE = [
+        { id: 'demo_light_red',    name: 'Красная',   category: 'light', status: 'clean', isDemo: true, svgType: 'tee_red',     createdAt: 1001 },
+        { id: 'demo_light_yellow', name: 'Жёлтая',    category: 'light', status: 'clean', isDemo: true, svgType: 'tee_yellow',  createdAt: 1002 },
+        { id: 'demo_light_green',  name: 'Зелёная',   category: 'light', status: 'clean', isDemo: true, svgType: 'tee_green',   createdAt: 1003 },
+        { id: 'demo_dark_1',       name: 'Чёрная',    category: 'dark',  status: 'clean', isDemo: true, svgType: 'tee_black_1', createdAt: 1004 },
+        { id: 'demo_dark_2',       name: 'Лонгслив',  category: 'dark',  status: 'clean', isDemo: true, svgType: 'tee_black_2', createdAt: 1005 },
+        { id: 'demo_dark_3',       name: 'Тёмная',    category: 'dark',  status: 'clean', isDemo: true, svgType: 'tee_black_3', createdAt: 1006 },
+      ];
+
+      function renderGarmentSVG(svgType) {
+        const palettes = {
+          tee_red:     { fill: '#ef4444', stroke: '#7f1d1d', collar: '#fca5a5', variant: 'tee' },
+          tee_yellow:  { fill: '#fde047', stroke: '#854d0e', collar: '#fef9c3', variant: 'tee' },
+          tee_green:   { fill: '#22c55e', stroke: '#14532d', collar: '#86efac', variant: 'tee' },
+          tee_black_1: { fill: '#111111', stroke: '#000000', collar: '#3f3f46', variant: 'tee' },
+          tee_black_2: { fill: '#18181b', stroke: '#000000', collar: '#52525b', variant: 'long' },
+          tee_black_3: { fill: '#0f172a', stroke: '#000000', collar: '#334155', variant: 'tee' },
+        };
+        const p = palettes[svgType] || palettes.tee_black_1;
+
+        if (p.variant === 'long') {
+          return `
+            <svg viewBox="0 0 120 140" class="w-full h-full p-2.5 drop-shadow-2xs" aria-hidden="true">
+              <path d="M44 24 L23 34 L12 84 L24 88 L35 54 L35 124 L85 124 L85 54 L96 88 L108 84 L97 34 L76 24 C70 35, 50 35, 44 24 Z"
+                fill="${p.fill}" stroke="${p.stroke}" stroke-width="2.4" stroke-linejoin="round" />
+              <path d="M44 24 C50 34, 70 34, 76 24" fill="none" stroke="${p.collar}" stroke-width="2.4" stroke-linecap="round" />
+            </svg>
+          `;
+        }
+
+        return `
+          <svg viewBox="0 0 120 140" class="w-full h-full p-2.5 drop-shadow-2xs" aria-hidden="true">
+            <path d="M44 25 L24 34 L14 70 L28 75 L37 53 L37 124 L83 124 L83 53 L92 75 L106 70 L96 34 L76 25 C70 36, 50 36, 44 25 Z"
+              fill="${p.fill}" stroke="${p.stroke}" stroke-width="2.4" stroke-linejoin="round" />
+            <path d="M44 25 C50 35, 70 35, 76 25" fill="none" stroke="${p.collar}" stroke-width="2.4" stroke-linecap="round" />
+          </svg>
+        `;
+      }
+
+      // =========================================================================
+      // 2. ХРАНИЛИЩЕ INDEXEDDB (+ FALLBACK НА LOCALSTORAGE)
+      // =========================================================================
+      const DB_NAME = 'MyWardrobePWA_DB';
+      const DB_VERSION = 1;
+      const STORE_NAME = 'kv_store';
+      const LS_FALLBACK_KEY = 'my_wardrobe_pwa_backup_v1';
+      const LS_PIN_FLAG_KEY = 'my_wardrobe_pin_enabled';
+
+      const Storage = {
+        db: null,
+        usingIndexedDB: false,
+
+        async init() {
+          if (!('indexedDB' in window)) {
+            this.usingIndexedDB = false;
+            return;
+          }
+          try {
+            this.db = await new Promise((resolve, reject) => {
+              const req = indexedDB.open(DB_NAME, DB_VERSION);
+              req.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains(STORE_NAME)) {
+                  db.createObjectStore(STORE_NAME);
+                }
+              };
+              req.onsuccess = () => resolve(req.result);
+              req.onerror = () => reject(req.error || new Error('IndexedDB open error'));
+            });
+            this.usingIndexedDB = true;
+          } catch (err) {
+            console.warn('IndexedDB недоступен, используем fallback:', err);
+            this.usingIndexedDB = false;
+          }
+        },
+
+        async get(key) {
+          if (this.usingIndexedDB && this.db) {
+            try {
+              return await new Promise((resolve, reject) => {
+                const tx = this.db.transaction(STORE_NAME, 'readonly');
+                const store = tx.objectStore(STORE_NAME);
+                const req = store.get(key);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error);
+              });
+            } catch (err) {
+              console.warn('Ошибка чтения IndexedDB:', err);
+            }
+          }
+          try {
+            const raw = localStorage.getItem(LS_FALLBACK_KEY);
+            if (!raw) return undefined;
+            return JSON.parse(raw)[key];
+          } catch {
+            return undefined;
+          }
+        },
+
+        async set(key, value) {
+          if (this.usingIndexedDB && this.db) {
+            try {
+              await new Promise((resolve, reject) => {
+                const tx = this.db.transaction(STORE_NAME, 'readwrite');
+                const store = tx.objectStore(STORE_NAME);
+                const req = store.put(value, key);
+                req.onsuccess = () => resolve();
+                req.onerror = () => reject(req.error);
+              });
+              return true;
+            } catch (err) {
+              console.warn('Ошибка записи IndexedDB:', err);
+            }
+          }
+          try {
+            const raw = localStorage.getItem(LS_FALLBACK_KEY);
+            const parsed = raw ? JSON.parse(raw) : {};
+            parsed[key] = value;
+            localStorage.setItem(LS_FALLBACK_KEY, JSON.stringify(parsed));
+            return true;
+          } catch (err) {
+            console.warn('Не удалось записать данные:', err);
+            return false;
+          }
+        }
+      };
+
+      // =========================================================================
+      // 3. SHA-256 ХЭШИРОВАНИЕ PIN-КОДА (WEB CRYPTO + PURE-JS FALLBACK)
+      // =========================================================================
+      function sha256Fallback(ascii) {
+        const rightRotate = (val, amount) => (val >>> amount) | (val << (32 - amount));
+        const maxWord = Math.pow(2, 32);
+        let result = '';
+        const words = [];
+        const asciiBitLength = ascii.length * 8;
+        const hash = [];
+        const k = [];
+        let primeCounter = 0;
+        const isComposite = {};
+
+        for (let candidate = 2; primeCounter < 64; candidate++) {
+          if (!isComposite[candidate]) {
+            for (let i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+            hash[primeCounter] = (Math.pow(candidate, 0.5) * maxWord) | 0;
+            k[primeCounter++] = (Math.pow(candidate, 1 / 3) * maxWord) | 0;
+          }
+        }
+
+        ascii += '\x80';
+        while ((ascii.length % 64) - 56) ascii += '\x00';
+        for (let i = 0; i < ascii.length; i++) {
+          const j = ascii.charCodeAt(i);
+          words[i >> 2] |= j << (((3 - i) % 4) * 8);
+        }
+        words[words.length] = (asciiBitLength / maxWord) | 0;
+        words[words.length] = asciiBitLength;
+
+        for (let j = 0; j < words.length;) {
+          const w = words.slice(j, (j += 16));
+          const oldHash = hash.slice(0);
+          for (let i = 0; i < 64; i++) {
+            const w15 = w[i - 15];
+            const w2 = w[i - 2];
+            const a = hash[0];
+            const e = hash[4];
+            const temp1 =
+              hash[7] +
+              (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25)) +
+              ((e & hash[5]) ^ (~e & hash[6])) +
+              k[i] +
+              (w[i] =
+                i < 16
+                  ? w[i]
+                  : (w[i - 16] +
+                      (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3)) +
+                      w[i - 7] +
+                      (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))) |
+                    0);
+            const temp2 =
+              (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22)) +
+              ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+            hash.unshift((temp1 + temp2) | 0);
+            hash[4] = (hash[4] + temp1) | 0;
+            hash.pop();
+          }
+          for (let i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+        }
+
+        for (let i = 0; i < 8; i++) {
+          for (let j = 3; j + 1; j--) {
+            const b = (hash[i] >> (j * 8)) & 255;
+            result += (b < 16 ? '0' : '') + b.toString(16);
+          }
+        }
+        return result;
+      }
+
+      async function hashPin(pinDigits) {
+        const salted = 'wardrobe_local_pin_v1:' + String(pinDigits);
+        try {
+          if (window.crypto && window.crypto.subtle) {
+            const data = new TextEncoder().encode(salted);
+            const buf = await window.crypto.subtle.digest('SHA-256', data);
+            return Array.from(new Uint8Array(buf))
+              .map(b => b.toString(16).padStart(2, '0'))
+              .join('');
+          }
+        } catch (err) {
+          console.warn('crypto.subtle недоступен, используем JS SHA-256:', err);
+        }
+        return sha256Fallback(salted);
+      }
+
+      // =========================================================================
+      // 4. СОСТОЯНИЕ ПРИЛОЖЕНИЯ
+      // =========================================================================
+      const state = {
+        items: DEMO_ITEMS_TEMPLATE.map(i => ({ ...i })),
+        activeTab: 0, // 0 = Чистое, 1 = В стирке
+        editMode: false,
+
+        // Модалка добавления
+        addCategory: 'light',
+        addPhotoDataUrl: null,
+
+        // Модалка редактирования
+        editingItemId: null,
+        editCategory: 'light',
+        editStatus: 'clean',
+        editPhotoDataUrl: null,
+        editPhotoChanged: false,
+
+        // Защита, PWA и бэкап
+        isStandalonePWA: false,
+        deferredInstallPrompt: null,
+        persistStatus: 'unknown', // 'persisted' | 'not_persisted' | 'unsupported' | 'unknown'
+        backupMeta: {
+          lastBackupAt: null,       // timestamp ms или null
+          changesSinceBackup: 0,    // число изменений с последнего бэкапа
+        },
+        pinHash: null,              // SHA-256 хэш 4-значного PIN или null
+
+        // Состояние экрана PIN
+        pinFlow: null,              // 'unlock' | 'setup' | 'setup_confirm' | 'change_verify' | 'change_new' | 'change_confirm' | 'disable_verify'
+        pinBuffer: '',
+        pinTempNew: '',
+
+        // Undo + toast
+        lastUndoSnapshot: null,
+        toastTimer: null,
+      };
+
+      // Ссылки на DOM-элементы
+      const els = {
+        protectionBtn: document.getElementById('protectionBtn'),
+        protectionAlertDot: document.getElementById('protectionAlertDot'),
+        tabPillIndicator: document.getElementById('tabPillIndicator'),
+        tabCleanBtn: document.getElementById('tabCleanBtn'),
+        tabLaundryBtn: document.getElementById('tabLaundryBtn'),
+        cleanCountBadge: document.getElementById('cleanCountBadge'),
+        laundryCountBadge: document.getElementById('laundryCountBadge'),
+        addBtn: document.getElementById('addBtn'),
+        editModeBanner: document.getElementById('editModeBanner'),
+        bannerDoneBtn: document.getElementById('bannerDoneBtn'),
+
+        snapContainer: document.getElementById('snapContainer'),
+        cleanPane: document.getElementById('cleanPane'),
+        laundryPane: document.getElementById('laundryPane'),
+
+        wearingSection: document.getElementById('wearingSection'),
+        wearingCountText: document.getElementById('wearingCountText'),
+        allToLaundryBtn: document.getElementById('allToLaundryBtn'),
+        wearingGrid: document.getElementById('wearingGrid'),
+
+        cleanLightCount: document.getElementById('cleanLightCount'),
+        cleanLightGrid: document.getElementById('cleanLightGrid'),
+        cleanLightEmpty: document.getElementById('cleanLightEmpty'),
+        cleanDarkCount: document.getElementById('cleanDarkCount'),
+        cleanDarkGrid: document.getElementById('cleanDarkGrid'),
+        cleanDarkEmpty: document.getElementById('cleanDarkEmpty'),
+
+        laundryAllEmpty: document.getElementById('laundryAllEmpty'),
+        laundrySectionsContainer: document.getElementById('laundrySectionsContainer'),
+        laundryLightCount: document.getElementById('laundryLightCount'),
+        laundryLightGrid: document.getElementById('laundryLightGrid'),
+        laundryLightEmpty: document.getElementById('laundryLightEmpty'),
+        washAllLightBtn: document.getElementById('washAllLightBtn'),
+        laundryDarkCount: document.getElementById('laundryDarkCount'),
+        laundryDarkGrid: document.getElementById('laundryDarkGrid'),
+        laundryDarkEmpty: document.getElementById('laundryDarkEmpty'),
+        washAllDarkBtn: document.getElementById('washAllDarkBtn'),
+
+        toastBox: document.getElementById('toastBox'),
+        toastMessage: document.getElementById('toastMessage'),
+        toastUndoBtn: document.getElementById('toastUndoBtn'),
+
+        // Модалка добавления
+        addModal: document.getElementById('addModal'),
+        closeAddModalBtn: document.getElementById('closeAddModalBtn'),
+        addItemForm: document.getElementById('addItemForm'),
+        addPhotoInput: document.getElementById('addPhotoInput'),
+        addPhotoPlaceholder: document.getElementById('addPhotoPlaceholder'),
+        addPhotoPreviewImg: document.getElementById('addPhotoPreviewImg'),
+        addPhotoMetaBadge: document.getElementById('addPhotoMetaBadge'),
+        addPhotoRetakeHint: document.getElementById('addPhotoRetakeHint'),
+        addPhotoErrorMsg: document.getElementById('addPhotoErrorMsg'),
+        addCatLightBtn: document.getElementById('addCatLightBtn'),
+        addCatDarkBtn: document.getElementById('addCatDarkBtn'),
+        addItemNameInput: document.getElementById('addItemNameInput'),
+
+        // Модалка редактирования
+        editItemModal: document.getElementById('editItemModal'),
+        closeEditItemModalBtn: document.getElementById('closeEditItemModalBtn'),
+        editItemForm: document.getElementById('editItemForm'),
+        editPhotoInput: document.getElementById('editPhotoInput'),
+        editPhotoSvgWrap: document.getElementById('editPhotoSvgWrap'),
+        editPhotoPreviewImg: document.getElementById('editPhotoPreviewImg'),
+        editPhotoMetaBadge: document.getElementById('editPhotoMetaBadge'),
+        editPhotoErrorMsg: document.getElementById('editPhotoErrorMsg'),
+        editCatLightBtn: document.getElementById('editCatLightBtn'),
+        editCatDarkBtn: document.getElementById('editCatDarkBtn'),
+        editItemNameInput: document.getElementById('editItemNameInput'),
+        editDeleteBtn: document.getElementById('editDeleteBtn'),
+
+        // Модалка «Защита и бэкап»
+        protectionModal: document.getElementById('protectionModal'),
+        closeProtectionModalBtn: document.getElementById('closeProtectionModalBtn'),
+        pwaStatusCard: document.getElementById('pwaStatusCard'),
+        pwaStatusDot: document.getElementById('pwaStatusDot'),
+        pwaStatusTitle: document.getElementById('pwaStatusTitle'),
+        pwaStatusDesc: document.getElementById('pwaStatusDesc'),
+        nativeInstallBtn: document.getElementById('nativeInstallBtn'),
+        pwaInstallGuide: document.getElementById('pwaInstallGuide'),
+        persistStatusDesc: document.getElementById('persistStatusDesc'),
+        persistStatusBadge: document.getElementById('persistStatusBadge'),
+        checkPersistBtn: document.getElementById('checkPersistBtn'),
+        storageUsageText: document.getElementById('storageUsageText'),
+        storageUsageBar: document.getElementById('storageUsageBar'),
+        storageItemsCountText: document.getElementById('storageItemsCountText'),
+        storageQuotaText: document.getElementById('storageQuotaText'),
+        backupMetaText: document.getElementById('backupMetaText'),
+        backupChangesBadge: document.getElementById('backupChangesBadge'),
+        backupReminderBox: document.getElementById('backupReminderBox'),
+        backupReminderText: document.getElementById('backupReminderText'),
+        shareBackupBtn: document.getElementById('shareBackupBtn'),
+        downloadBackupBtn: document.getElementById('downloadBackupBtn'),
+        restoreBackupInput: document.getElementById('restoreBackupInput'),
+        backupErrorMsg: document.getElementById('backupErrorMsg'),
+        modalEditModeBtn: document.getElementById('modalEditModeBtn'),
+        modalEditModeIcon: document.getElementById('modalEditModeIcon'),
+        modalEditModeText: document.getElementById('modalEditModeText'),
+        modalEditModeBadge: document.getElementById('modalEditModeBadge'),
+        pinStatusDesc: document.getElementById('pinStatusDesc'),
+        pinStatusBadge: document.getElementById('pinStatusBadge'),
+        pinOffActions: document.getElementById('pinOffActions'),
+        pinOnActions: document.getElementById('pinOnActions'),
+        enablePinBtn: document.getElementById('enablePinBtn'),
+        changePinBtn: document.getElementById('changePinBtn'),
+        lockNowBtn: document.getElementById('lockNowBtn'),
+        disablePinBtn: document.getElementById('disablePinBtn'),
+        removeDemoBtn: document.getElementById('removeDemoBtn'),
+        demoCountBadge: document.getElementById('demoCountBadge'),
+        resetDemoBtn: document.getElementById('resetDemoBtn'),
+
+        // PIN-экран
+        pinOverlay: document.getElementById('pinOverlay'),
+        pinCancelBtn: document.getElementById('pinCancelBtn'),
+        pinTitle: document.getElementById('pinTitle'),
+        pinSubtitle: document.getElementById('pinSubtitle'),
+        pinDotsRow: document.getElementById('pinDotsRow'),
+        pinErrorText: document.getElementById('pinErrorText'),
+        pinBackspaceBtn: document.getElementById('pinBackspaceBtn'),
+      };
+
+      // Сразу показываем экран блокировки до отрисовки фото, если PIN был включён
+      try {
+        if (localStorage.getItem(LS_PIN_FLAG_KEY) === '1') {
+          els.pinOverlay.classList.remove('hidden');
+        }
+      } catch {
+        // Игнорируем ограничения песочницы
+      }
+
+      // =========================================================================
+      // 5. СОХРАНЕНИЕ, МЕТАДАННЫЕ БЭКАПА И UNDO
+      // =========================================================================
+      function cloneItems(list) {
+        return list.map(item => ({ ...item }));
+      }
+
+      async function persistStateChanges(incrementChangeCount = true) {
+        await Storage.set('items', state.items);
+        if (incrementChangeCount) {
+          state.backupMeta.changesSinceBackup = (state.backupMeta.changesSinceBackup || 0) + 1;
+          await Storage.set('backupMeta', state.backupMeta);
+        }
+        updateProtectionIndicatorDot();
+        if (!els.protectionModal.classList.contains('hidden')) {
+          refreshProtectionModalData();
+        }
+      }
+
+      function saveUndoPoint() {
+        state.lastUndoSnapshot = cloneItems(state.items);
+      }
+
+      async function undoLastAction() {
+        if (!state.lastUndoSnapshot) return;
+        state.items = cloneItems(state.lastUndoSnapshot);
+        state.lastUndoSnapshot = null;
+        hideToast();
+        renderAll();
+        await persistStateChanges(true);
+        showToast('Действие отменено', false);
+      }
+
+      // =========================================================================
+      // 6. ЗАЩИТА ХРАНИЛИЩА, PWA-СТАТУС, ОЦЕНКА ПАМЯТИ И УМНОЕ НАПОМИНАНИЕ
+      // =========================================================================
+      function detectStandalonePWA() {
+        const mediaStandalone = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
+        const iosStandalone = window.navigator && window.navigator.standalone === true;
+        state.isStandalonePWA = Boolean(mediaStandalone || iosStandalone);
+        return state.isStandalonePWA;
+      }
+
+      // Перехват события установки PWA на Android (Chrome / Edge / Samsung Internet)
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        state.deferredInstallPrompt = e;
+        updatePWAStatusUI();
+      });
+
+      window.addEventListener('appinstalled', () => {
+        state.deferredInstallPrompt = null;
+        state.isStandalonePWA = true;
+        updatePWAStatusUI();
+        updateProtectionIndicatorDot();
+        showToast('Приложение установлено на экран «Домой»', false);
+      });
+
+      async function requestPersistentStorage(userTriggered = false) {
+        if (!navigator.storage || typeof navigator.storage.persist !== 'function') {
+          state.persistStatus = 'unsupported';
+          updatePersistUI();
+          if (userTriggered) {
+            showToast('Браузер не поддерживает Storage Persist API', false);
+          }
+          return false;
+        }
+
+        try {
+          let alreadyPersisted = false;
+          if (typeof navigator.storage.persisted === 'function') {
+            alreadyPersisted = await navigator.storage.persisted();
+          }
+
+          if (alreadyPersisted) {
+            state.persistStatus = 'persisted';
+          } else {
+            const granted = await navigator.storage.persist();
+            state.persistStatus = granted ? 'persisted' : 'not_persisted';
+          }
+        } catch (err) {
+          console.warn('Ошибка запроса navigator.storage.persist():', err);
+          state.persistStatus = 'not_persisted';
+        }
+
+        updatePersistUI();
+        if (userTriggered) {
+          if (state.persistStatus === 'persisted') {
+            showToast('Постоянное хранилище активно', false);
+          } else {
+            showToast('Добавьте сайт на экран «Домой», чтобы усилить защиту', false);
+          }
+        }
+        return state.persistStatus === 'persisted';
+      }
+
+      function formatBytesMB(bytes) {
+        if (!Number.isFinite(bytes) || bytes <= 0) return '0.00 МБ';
+        if (bytes < 1024 * 1024) {
+          return `${Math.max(1, Math.round(bytes / 1024))} КБ`;
+        }
+        return `${(bytes / (1024 * 1024)).toFixed(2)} МБ`;
+      }
+
+      function estimateLocalItemsBytes() {
+        try {
+          const jsonStr = JSON.stringify(state.items);
+          return new Blob([jsonStr]).size;
+        } catch {
+          return 0;
+        }
+      }
+
+      async function updateStorageEstimateUI() {
+        const itemsBytes = estimateLocalItemsBytes();
+        const photoCount = state.items.filter(i => Boolean(i.photoDataUrl)).length;
+        els.storageItemsCountText.textContent = `Вещей: ${state.items.length} (с фото: ${photoCount})`;
+
+        let usageBytes = itemsBytes;
+        let quotaBytes = 0;
+
+        try {
+          if (navigator.storage && typeof navigator.storage.estimate === 'function') {
+            const est = await navigator.storage.estimate();
+            if (typeof est.usage === 'number' && est.usage > itemsBytes) {
+              usageBytes = est.usage;
+            }
+            if (typeof est.quota === 'number') {
+              quotaBytes = est.quota;
+            }
+          }
+        } catch (err) {
+          console.warn('navigator.storage.estimate недоступен:', err);
+        }
+
+        els.storageUsageText.textContent = formatBytesMB(usageBytes);
+        if (quotaBytes > 0) {
+          const quotaMb = Math.round(quotaBytes / (1024 * 1024));
+          els.storageQuotaText.textContent = quotaMb >= 1024
+            ? `Лимит браузера: ~${(quotaMb / 1024).toFixed(1)} ГБ`
+            : `Лимит браузера: ~${quotaMb} МБ`;
+          const pct = Math.max(3, Math.min(100, (usageBytes / quotaBytes) * 100));
+          els.storageUsageBar.style.width = `${pct.toFixed(1)}%`;
+        } else {
+          els.storageQuotaText.textContent = Storage.usingIndexedDB ? 'IndexedDB активно' : 'Локальная память';
+          const fallbackPct = Math.max(4, Math.min(100, (usageBytes / (50 * 1024 * 1024)) * 100));
+          els.storageUsageBar.style.width = `${fallbackPct.toFixed(1)}%`;
+        }
+      }
+
+      function evaluateBackupReminder() {
+        const userPhotosCount = state.items.filter(i => !i.isDemo).length;
+        const changes = state.backupMeta.changesSinceBackup || 0;
+        const lastAt = state.backupMeta.lastBackupAt;
+        const daysSince = lastAt ? Math.floor((Date.now() - lastAt) / (1000 * 60 * 60 * 24)) : null;
+
+        if (!lastAt && userPhotosCount >= 3) {
+          return {
+            needed: true,
+            reason: `Вы уже добавили ${userPhotosCount} своих вещей, но резервная копия ещё не сохранялась. Сохраните файл на всякий случай.`,
+          };
+        }
+        if (lastAt && daysSince >= 14 && changes > 0) {
+          return {
+            needed: true,
+            reason: `С последнего бэкапа прошло ${daysSince} дн. и накопилось ${changes} изменений. Пора обновить копию.`,
+          };
+        }
+        if (changes >= 12) {
+          return {
+            needed: true,
+            reason: `С момента последнего бэкапа накопилось ${changes} изменений. Рекомендуем сохранить свежую копию.`,
+          };
+        }
+        return { needed: false, reason: '' };
+      }
+
+      function updateProtectionIndicatorDot() {
+        detectStandalonePWA();
+        const backupCheck = evaluateBackupReminder();
+        const shouldShowDot = !state.isStandalonePWA || backupCheck.needed;
+        els.protectionAlertDot.classList.toggle('hidden', !shouldShowDot);
+      }
+
+      function updatePWAStatusUI() {
+        detectStandalonePWA();
+
+        if (state.isStandalonePWA) {
+          els.pwaStatusCard.className = 'rounded-2xl border border-emerald-200 bg-emerald-50/70 p-3.5 space-y-2';
+          els.pwaStatusDot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0 mt-1';
+          els.pwaStatusTitle.textContent = 'Запущено как приложение (PWA)';
+          els.pwaStatusDesc.textContent = 'Иконка на экране «Домой» активна — защита от 7-дневной автоочистки Safari включена.';
+          els.pwaInstallGuide.classList.add('hidden');
+          els.nativeInstallBtn.classList.add('hidden');
+        } else {
+          els.pwaStatusCard.className = 'rounded-2xl border border-amber-300/90 bg-amber-50/75 p-3.5 space-y-2.5';
+          els.pwaStatusDot.className = 'w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0 mt-1';
+          els.pwaStatusTitle.textContent = 'Открыто в обычной вкладке браузера';
+          els.pwaStatusDesc.textContent = 'Добавьте сайт на экран «Домой», чтобы открывать в 1 тап на весь экран и защитить фото от автоочистки.';
+          els.pwaInstallGuide.classList.remove('hidden');
+          els.nativeInstallBtn.classList.toggle('hidden', !state.deferredInstallPrompt);
+        }
+      }
+
+      function updatePersistUI() {
+        if (state.persistStatus === 'persisted') {
+          els.persistStatusBadge.textContent = 'Активно';
+          els.persistStatusBadge.className = 'shrink-0 px-2 py-1 rounded-lg text-[10px] font-extrabold bg-emerald-100 text-emerald-800';
+          els.persistStatusDesc.textContent = 'Браузер не удалит фото при нехватке места';
+        } else if (state.persistStatus === 'unsupported') {
+          els.persistStatusBadge.textContent = 'Недоступно';
+          els.persistStatusBadge.className = 'shrink-0 px-2 py-1 rounded-lg text-[10px] font-extrabold bg-slate-200 text-slate-600';
+          els.persistStatusDesc.textContent = 'Управляйте защитой через установку PWA и бэкапы';
+        } else {
+          els.persistStatusBadge.textContent = 'Обычный режим';
+          els.persistStatusBadge.className = 'shrink-0 px-2 py-1 rounded-lg text-[10px] font-extrabold bg-amber-100 text-amber-800';
+          els.persistStatusDesc.textContent = 'Установите как PWA и нажмите проверку ниже';
+        }
+      }
+
+      function updateBackupMetaUI() {
+        const lastAt = state.backupMeta.lastBackupAt;
+        const changes = state.backupMeta.changesSinceBackup || 0;
+
+        if (lastAt) {
+          const d = new Date(lastAt);
+          const dateStr = d.toLocaleDateString('ru-RU', { day: '2-digit', month: 'short', year: 'numeric' });
+          const timeStr = d.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+          els.backupMetaText.textContent = `Последний бэкап: ${dateStr}, ${timeStr}`;
+        } else {
+          els.backupMetaText.textContent = 'Последний бэкап: ещё не делался';
+        }
+
+        els.backupChangesBadge.textContent = `${changes} изм.`;
+        els.backupChangesBadge.className = changes > 0
+          ? 'shrink-0 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800'
+          : 'shrink-0 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700';
+
+        const reminder = evaluateBackupReminder();
+        if (reminder.needed) {
+          els.backupReminderText.textContent = reminder.reason;
+          els.backupReminderBox.classList.remove('hidden');
+        } else {
+          els.backupReminderBox.classList.add('hidden');
+        }
+      }
+
+      function updatePinSettingsUI() {
+        const enabled = Boolean(state.pinHash);
+        if (enabled) {
+          els.pinStatusBadge.textContent = 'Включён';
+          els.pinStatusBadge.className = 'shrink-0 px-2 py-1 rounded-lg text-[10px] font-extrabold bg-emerald-100 text-emerald-800';
+          els.pinStatusDesc.textContent = 'Запрашивается при открытии (SHA-256 локально)';
+          els.pinOffActions.classList.add('hidden');
+          els.pinOnActions.classList.remove('hidden');
+        } else {
+          els.pinStatusBadge.textContent = 'Выкл';
+          els.pinStatusBadge.className = 'shrink-0 px-2 py-1 rounded-lg text-[10px] font-extrabold bg-slate-200 text-slate-600';
+          els.pinStatusDesc.textContent = 'Выключен (вход без лишних нажатий)';
+          els.pinOffActions.classList.remove('hidden');
+          els.pinOnActions.classList.add('hidden');
+        }
+      }
+
+      async function refreshProtectionModalData() {
+        updatePWAStatusUI();
+        updatePersistUI();
+        updateBackupMetaUI();
+        updateEditModeUI();
+        updatePinSettingsUI();
+        els.demoCountBadge.textContent = state.items.filter(i => i.isDemo).length;
+        await updateStorageEstimateUI();
+      }
+
+      // =========================================================================
+      // 7. БЭКАП: СКАЧАТЬ, ПОДЕЛИТЬСЯ (WEB SHARE API), ВОССТАНОВИТЬ
+      // =========================================================================
+      function buildBackupPayload() {
+        return {
+          app: 'Мой Гардероб',
+          version: 2,
+          exportedAt: new Date().toISOString(),
+          items: state.items,
+        };
+      }
+
+      function buildBackupFileName() {
+        const d = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        return `wardrobe-backup-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.json`;
+      }
+
+      async function markBackupCompleted() {
+        state.backupMeta = {
+          lastBackupAt: Date.now(),
+          changesSinceBackup: 0,
+        };
+        await Storage.set('backupMeta', state.backupMeta);
+        updateBackupMetaUI();
+        updateProtectionIndicatorDot();
+      }
+
+      function triggerDownloadBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1200);
+      }
+
+      async function handleDownloadBackup() {
+        els.backupErrorMsg.classList.add('hidden');
+        try {
+          const payload = buildBackupPayload();
+          const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+          triggerDownloadBlob(blob, buildBackupFileName());
+          await markBackupCompleted();
+          showToast('Бэкап сохранён в загрузки', false);
+        } catch {
+          els.backupErrorMsg.textContent = 'Не удалось сформировать файл резервной копии.';
+          els.backupErrorMsg.classList.remove('hidden');
+        }
+      }
+
+      async function handleShareBackup() {
+        els.backupErrorMsg.classList.add('hidden');
+        try {
+          const payload = buildBackupPayload();
+          const filename = buildBackupFileName();
+          const jsonStr = JSON.stringify(payload, null, 2);
+          const file = new File([jsonStr], filename, { type: 'application/json' });
+
+          if (navigator.share && typeof navigator.canShare === 'function' && navigator.canShare({ files: [file] })) {
+            await navigator.share({
+              title: 'Резервная копия — Мой Гардероб',
+              text: `Резервная копия гардероба (${state.items.length} вещей)`,
+              files: [file],
+            });
+            await markBackupCompleted();
+            showToast('Бэкап отправлен', false);
+            return;
+          }
+
+          // Если браузер на ПК или без поддержки шаринга файлов — скачиваем напрямую
+          const blob = new Blob([jsonStr], { type: 'application/json' });
+          triggerDownloadBlob(blob, filename);
+          await markBackupCompleted();
+          showToast('Шаринг не поддерживается — файл скачан', false);
+        } catch (err) {
+          if (err && err.name === 'AbortError') return; // Пользователь закрыл системное окно «Поделиться»
+          els.backupErrorMsg.textContent = 'Не удалось поделиться файлом. Попробуйте кнопку «Скачать (.json)».';
+          els.backupErrorMsg.classList.remove('hidden');
+        }
+      }
+
+      function handleRestoreBackupFile(file) {
+        els.backupErrorMsg.classList.add('hidden');
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onerror = () => {
+          els.backupErrorMsg.textContent = 'Ошибка чтения выбранного файла.';
+          els.backupErrorMsg.classList.remove('hidden');
+        };
+        reader.onload = async () => {
+          try {
+            const parsed = JSON.parse(String(reader.result || ''));
+            const importedList = Array.isArray(parsed) ? parsed : parsed?.items;
+            if (!Array.isArray(importedList)) {
+              throw new Error('Invalid structure');
+            }
+
+            const sanitized = importedList
+              .filter(item => item && typeof item === 'object')
+              .map((item, idx) => ({
+                id: String(item.id || ('imp_' + Date.now() + '_' + idx)),
+                name: typeof item.name === 'string' ? item.name.slice(0, 32) : '',
+                category: item.category === 'dark' ? 'dark' : 'light',
+                status: ['clean', 'wearing', 'laundry'].includes(item.status) ? item.status : 'clean',
+                isDemo: Boolean(item.isDemo),
+                photoDataUrl: typeof item.photoDataUrl === 'string' ? item.photoDataUrl : undefined,
+                svgType: typeof item.svgType === 'string' ? item.svgType : undefined,
+                createdAt: Number(item.createdAt) || Date.now() + idx,
+              }));
+
+            saveUndoPoint();
+            state.items = sanitized;
+            await Storage.set('items', state.items);
+            await markBackupCompleted();
+            renderAll();
+            closeProtectionModal();
+            showToast(`Восстановлено вещей: ${sanitized.length}`, true);
+          } catch {
+            els.backupErrorMsg.textContent = 'Файл не похож на резервную копию «Мой Гардероб».';
+            els.backupErrorMsg.classList.remove('hidden');
+          }
+        };
+        reader.readAsText(file);
+      }
+
+      // =========================================================================
+      // 8. ОПЦИОНАЛЬНЫЙ 4-ЗНАЧНЫЙ PIN-КОД
+      // =========================================================================
+      function renderPinDots() {
+        const dots = els.pinDotsRow.querySelectorAll('.pin-dot');
+        dots.forEach((dot, idx) => {
+          const filled = idx < state.pinBuffer.length;
+          dot.className = filled
+            ? 'pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-900 bg-slate-900 scale-110 transition-all'
+            : 'pin-dot w-3.5 h-3.5 rounded-full border-2 border-slate-300 bg-transparent transition-all';
+        });
+      }
+
+      function triggerPinError(message) {
+        els.pinErrorText.textContent = message;
+        els.pinDotsRow.classList.remove('animate-pin-shake');
+        void els.pinDotsRow.offsetWidth; // перезапуск анимации
+        els.pinDotsRow.classList.add('animate-pin-shake');
+        state.pinBuffer = '';
+        setTimeout(() => renderPinDots(), 220);
+      }
+
+      function openPinOverlay(flow) {
+        state.pinFlow = flow;
+        state.pinBuffer = '';
+        state.pinTempNew = '';
+        els.pinErrorText.textContent = '';
+
+        const titles = {
+          unlock:         ['Введите PIN-код', 'Локальный доступ к вашему гардеробу'],
+          setup:          ['Придумайте PIN-код', 'Введите 4 цифры для защиты'],
+          change_verify:  ['Текущий PIN-код', 'Подтвердите действующий PIN'],
+          disable_verify: ['Отключение PIN', 'Введите текущий PIN-код'],
+        };
+        const [t, sub] = titles[flow] || titles.unlock;
+        els.pinTitle.textContent = t;
+        els.pinSubtitle.textContent = sub;
+        els.pinCancelBtn.classList.toggle('hidden', flow === 'unlock');
+        renderPinDots();
+        els.pinOverlay.classList.remove('hidden');
+      }
+
+      function closePinOverlay() {
+        state.pinFlow = null;
+        state.pinBuffer = '';
+        state.pinTempNew = '';
+        els.pinOverlay.classList.add('hidden');
+      }
+
+      async function savePinHash(newHash) {
+        state.pinHash = newHash;
+        await Storage.set('pinHash', newHash);
+        try {
+          if (newHash) localStorage.setItem(LS_PIN_FLAG_KEY, '1');
+          else localStorage.removeItem(LS_PIN_FLAG_KEY);
+        } catch {
+          // Игнорируем ограничения песочницы
+        }
+        updatePinSettingsUI();
+      }
+
+      async function processCompletedPin() {
+        const entered = state.pinBuffer;
+        const flow = state.pinFlow;
+
+        if (flow === 'unlock') {
+          const enteredHash = await hashPin(entered);
+          if (enteredHash === state.pinHash) {
+            closePinOverlay();
+          } else {
+            triggerPinError('Неверный PIN-код');
+          }
+          return;
+        }
+
+        if (flow === 'setup') {
+          state.pinTempNew = entered;
+          state.pinFlow = 'setup_confirm';
+          state.pinBuffer = '';
+          els.pinErrorText.textContent = '';
+          els.pinTitle.textContent = 'Повторите PIN-код';
+          els.pinSubtitle.textContent = 'Введите те же 4 цифры ещё раз';
+          renderPinDots();
+          return;
+        }
+
+        if (flow === 'setup_confirm') {
+          if (entered !== state.pinTempNew) {
+            state.pinFlow = 'setup';
+            state.pinTempNew = '';
+            els.pinTitle.textContent = 'Придумайте PIN-код';
+            els.pinSubtitle.textContent = 'Попробуйте ввести 4 цифры заново';
+            triggerPinError('PIN-коды не совпали');
+            return;
+          }
+          const h = await hashPin(entered);
+          await savePinHash(h);
+          closePinOverlay();
+          showToast('4-значный PIN-код включён', false);
+          return;
+        }
+
+        if (flow === 'change_verify') {
+          const enteredHash = await hashPin(entered);
+          if (enteredHash !== state.pinHash) {
+            triggerPinError('Неверный текущий PIN');
+            return;
+          }
+          state.pinFlow = 'change_new';
+          state.pinBuffer = '';
+          els.pinErrorText.textContent = '';
+          els.pinTitle.textContent = 'Новый PIN-код';
+          els.pinSubtitle.textContent = 'Введите новые 4 цифры';
+          renderPinDots();
+          return;
+        }
+
+        if (flow === 'change_new') {
+          state.pinTempNew = entered;
+          state.pinFlow = 'change_confirm';
+          state.pinBuffer = '';
+          els.pinErrorText.textContent = '';
+          els.pinTitle.textContent = 'Повторите новый PIN';
+          els.pinSubtitle.textContent = 'Подтвердите новые 4 цифры';
+          renderPinDots();
+          return;
+        }
+
+        if (flow === 'change_confirm') {
+          if (entered !== state.pinTempNew) {
+            state.pinFlow = 'change_new';
+            state.pinTempNew = '';
+            els.pinTitle.textContent = 'Новый PIN-код';
+            els.pinSubtitle.textContent = 'Введите новые 4 цифры заново';
+            triggerPinError('PIN-коды не совпали');
+            return;
+          }
+          const h = await hashPin(entered);
+          await savePinHash(h);
+          closePinOverlay();
+          showToast('PIN-код обновлён', false);
+          return;
+        }
+
+        if (flow === 'disable_verify') {
+          const enteredHash = await hashPin(entered);
+          if (enteredHash !== state.pinHash) {
+            triggerPinError('Неверный PIN-код');
+            return;
+          }
+          await savePinHash(null);
+          closePinOverlay();
+          showToast('PIN-код отключён', false);
+        }
+      }
+
+      document.querySelectorAll('[data-pin-digit]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (!state.pinFlow || state.pinBuffer.length >= 4) return;
+          els.pinErrorText.textContent = '';
+          state.pinBuffer += btn.dataset.pinDigit;
+          renderPinDots();
+          if (state.pinBuffer.length === 4) {
+            setTimeout(() => processCompletedPin(), 110);
+          }
+        });
+      });
+
+      els.pinBackspaceBtn.addEventListener('click', () => {
+        if (!state.pinFlow || state.pinBuffer.length === 0) return;
+        state.pinBuffer = state.pinBuffer.slice(0, -1);
+        renderPinDots();
+      });
+
+      els.pinCancelBtn.addEventListener('click', () => {
+        if (state.pinFlow !== 'unlock') closePinOverlay();
+      });
+
+      // =========================================================================
+      // 9. ОСНОВНЫЕ ДЕЙСТВИЯ С ОДЕЖДОЙ (МИНИМУМ КЛИКОВ)
+      // =========================================================================
+      async function setItemStatus(itemId, newStatus, toastText, allowUndo = true) {
+        const idx = state.items.findIndex(i => i.id === itemId);
+        if (idx === -1) return;
+
+        if (allowUndo) saveUndoPoint();
+        state.items[idx] = { ...state.items[idx], status: newStatus };
+        renderAll();
+
+        if (newStatus === 'wearing') {
+          els.cleanPane.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        if (toastText) showToast(toastText, allowUndo);
+        await persistStateChanges(true);
+      }
+
+      async function toggleItemColor(itemId) {
+        const idx = state.items.findIndex(i => i.id === itemId);
+        if (idx === -1) return;
+
+        saveUndoPoint();
+        const nextCategory = state.items[idx].category === 'light' ? 'dark' : 'light';
+        state.items[idx] = { ...state.items[idx], category: nextCategory };
+        renderAll();
+
+        const label = nextCategory === 'dark' ? 'Перенесено в «Тёмное»' : 'Перенесено в «Светлое»';
+        showToast(label, true);
+        await persistStateChanges(true);
+      }
+
+      async function sendAllWearingToLaundry() {
+        const wearing = state.items.filter(i => i.status === 'wearing');
+        if (wearing.length === 0) return;
+
+        saveUndoPoint();
+        state.items = state.items.map(i => i.status === 'wearing' ? { ...i, status: 'laundry' } : i);
+        renderAll();
+        showToast(`Отправлено в стирку (${wearing.length})`, true);
+        await persistStateChanges(true);
+      }
+
+      async function washAllByCategory(category) {
+        const matching = state.items.filter(i => i.status === 'laundry' && i.category === category);
+        if (matching.length === 0) return;
+
+        saveUndoPoint();
+        state.items = state.items.map(i =>
+          (i.status === 'laundry' && i.category === category) ? { ...i, status: 'clean' } : i
+        );
+        renderAll();
+        const label = category === 'light' ? 'Светлое постирано' : 'Тёмное постирано';
+        showToast(`${label} (${matching.length})`, true);
+        await persistStateChanges(true);
+      }
+
+      async function deleteItem(itemId) {
+        const exists = state.items.some(i => i.id === itemId);
+        if (!exists) return;
+
+        saveUndoPoint();
+        state.items = state.items.filter(i => i.id !== itemId);
+        renderAll();
+        showToast('Вещь удалена', true);
+        await persistStateChanges(true);
+      }
+
+      async function removeDemoItems() {
+        const count = state.items.filter(i => i.isDemo).length;
+        if (count === 0) {
+          showToast('Демо-вещей уже нет', false);
+          return;
+        }
+        saveUndoPoint();
+        state.items = state.items.filter(i => !i.isDemo);
+        renderAll();
+        closeProtectionModal();
+        showToast(`Удалено демо-вещей: ${count}`, true);
+        await persistStateChanges(true);
+      }
+
+      async function resetDemoItems() {
+        saveUndoPoint();
+        const userItems = state.items.filter(i => !i.isDemo);
+        const freshDemo = DEMO_ITEMS_TEMPLATE.map(i => ({ ...i }));
+        state.items = [...freshDemo, ...userItems];
+        renderAll();
+        closeProtectionModal();
+        showToast('Демо-вещи восстановлены', true);
+        await persistStateChanges(true);
+      }
+
+      // =========================================================================
+      // 10. РЕНДЕРИНГ КАРТОЧЕК-ПОСТЕРОВ (3 В РЯД)
+      // =========================================================================
+      function createPosterCard(item, mode) {
+        const card = document.createElement('article');
+        card.className = `relative bg-white rounded-[20px] border-2 ${
+          state.editMode ? 'border-slate-900 edit-mode-card' : 'border-slate-800/90'
+        } shadow-xs overflow-hidden flex flex-col animate-card-pop`;
+        card.dataset.itemId = item.id;
+
+        const mediaWrap = document.createElement('div');
+        mediaWrap.className = 'relative w-full aspect-[3/4] bg-white flex items-center justify-center overflow-hidden';
+
+        if (item.photoDataUrl) {
+          const img = document.createElement('img');
+          img.src = item.photoDataUrl;
+          img.alt = item.name || 'Одежда';
+          img.className = 'w-full h-full object-cover';
+          img.loading = 'lazy';
+          mediaWrap.appendChild(img);
+        } else {
+          mediaWrap.innerHTML = renderGarmentSVG(item.svgType);
+        }
+
+        if (item.name && item.name.trim().length > 0) {
+          const caption = document.createElement('div');
+          caption.className = 'absolute inset-x-1 bottom-1 px-1.5 py-0.5 rounded-lg bg-white/90 backdrop-blur-xs text-[10px] font-bold text-slate-800 truncate text-center border border-slate-200/80';
+          caption.textContent = item.name;
+          mediaWrap.appendChild(caption);
+        }
+
+        // Оверлеи в углах карточки
+        if (state.editMode) {
+          // Левый верхний угол: «✎» — полное редактирование
+          const editBtn = document.createElement('button');
+          editBtn.type = 'button';
+          editBtn.title = 'Редактировать вещь';
+          editBtn.ariaLabel = 'Редактировать вещь';
+          editBtn.className = 'absolute top-1.5 left-1.5 w-7 h-7 rounded-full bg-white/95 hover:bg-white text-slate-900 shadow-md border-2 border-slate-800/90 flex items-center justify-center active:scale-90 transition z-10';
+          editBtn.innerHTML = `
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          `;
+          editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openEditItemModal(item.id);
+          });
+          mediaWrap.appendChild(editBtn);
+
+          // Правый верхний угол: быстрое удаление «✕»
+          const delBtn = document.createElement('button');
+          delBtn.type = 'button';
+          delBtn.title = 'Удалить вещь';
+          delBtn.ariaLabel = 'Удалить вещь';
+          delBtn.className = 'absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-rose-500 hover:bg-rose-600 text-white shadow-md border-2 border-white flex items-center justify-center active:scale-90 transition z-10';
+          delBtn.innerHTML = `
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.8">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          `;
+          delBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            deleteItem(item.id);
+          });
+          mediaWrap.appendChild(delBtn);
+
+          if (mode === 'wearing') {
+            const colorTag = document.createElement('span');
+            colorTag.className = item.category === 'light'
+              ? 'absolute bottom-1 left-1 px-1.5 py-0.5 rounded-md bg-amber-100/95 text-amber-900 text-[9px] font-extrabold border border-amber-300'
+              : 'absolute bottom-1 left-1 px-1.5 py-0.5 rounded-md bg-slate-900/90 text-white text-[9px] font-extrabold';
+            colorTag.textContent = item.category === 'light' ? 'Светлое' : 'Тёмное';
+            mediaWrap.appendChild(colorTag);
+          }
+        } else if (mode === 'wearing') {
+          // Кнопка отмены «↩» на карточке «На мне сегодня»
+          const undoWearBtn = document.createElement('button');
+          undoWearBtn.type = 'button';
+          undoWearBtn.title = 'Вернуть в «Чистое»';
+          undoWearBtn.ariaLabel = 'Вернуть в «Чистое»';
+          undoWearBtn.className = 'absolute top-1.5 right-1.5 w-7 h-7 rounded-full bg-white/95 hover:bg-white text-slate-800 shadow-md border border-slate-300 flex items-center justify-center active:scale-90 transition';
+          undoWearBtn.innerHTML = `
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3" />
+            </svg>
+          `;
+          undoWearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            setItemStatus(item.id, 'clean', 'Возвращено в «Чистое»', false);
+          });
+          mediaWrap.appendChild(undoWearBtn);
+        }
+
+        card.appendChild(mediaWrap);
+
+        // Нижняя кнопка на всю ширину карточки
+        const actionWrap = document.createElement('div');
+        actionWrap.className = 'p-1.5 bg-white border-t border-slate-100';
+
+        const actionBtn = document.createElement('button');
+        actionBtn.type = 'button';
+
+        if (state.editMode) {
+          if (item.category === 'light') {
+            actionBtn.className = 'w-full py-2 px-1 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-95 text-white text-[11px] font-extrabold shadow-xs transition flex items-center justify-center gap-1 whitespace-nowrap';
+            actionBtn.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-slate-700 border border-white/80 shrink-0"></span><span>→ Тёмное</span>`;
+          } else {
+            actionBtn.className = 'w-full py-2 px-1 rounded-xl bg-amber-50 hover:bg-amber-100 active:scale-95 text-slate-900 border-[1.5px] border-slate-800 text-[11px] font-extrabold shadow-xs transition flex items-center justify-center gap-1 whitespace-nowrap';
+            actionBtn.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-white border border-amber-500 shrink-0"></span><span>→ Светлое</span>`;
+          }
+          actionBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleItemColor(item.id);
+          });
+        } else if (mode === 'clean') {
+          actionBtn.className = 'w-full py-2 px-1 rounded-xl bg-[#16a34a] hover:bg-[#15803d] active:scale-95 text-white text-[12px] font-extrabold border border-slate-900/80 shadow-xs transition';
+          actionBtn.textContent = 'Выбрать';
+          actionBtn.addEventListener('click', () => {
+            setItemStatus(item.id, 'wearing', 'Выбрано на сегодня', true);
+          });
+        } else if (mode === 'wearing') {
+          actionBtn.className = 'w-full py-2 px-1 rounded-xl bg-gradient-to-r from-rose-500 to-orange-500 hover:from-rose-600 hover:to-orange-600 active:scale-95 text-white text-[12px] font-extrabold shadow-xs transition';
+          actionBtn.textContent = 'Грязное';
+          actionBtn.addEventListener('click', () => {
+            setItemStatus(item.id, 'laundry', 'Отправлено в стирку', true);
+          });
+        } else {
+          actionBtn.className = 'w-full py-2 px-1 rounded-xl bg-sky-500 hover:bg-sky-600 active:scale-95 text-white text-[12px] font-extrabold shadow-xs transition';
+          actionBtn.textContent = 'В чистое';
+          actionBtn.addEventListener('click', () => {
+            setItemStatus(item.id, 'clean', 'Возвращено в «Чистое»', true);
+          });
+        }
+
+        actionWrap.appendChild(actionBtn);
+        card.appendChild(actionWrap);
+
+        // Долгое нажатие включает режим «Править»
+        let longPressTimer = null;
+        card.addEventListener('pointerdown', (e) => {
+          if (e.target.closest('button')) return;
+          longPressTimer = setTimeout(() => {
+            if (!state.editMode) {
+              setEditMode(true);
+              showToast('Включён режим «Править»', false);
+            }
+          }, 600);
+        });
+        const cancelPress = () => {
+          if (longPressTimer) {
+            clearTimeout(longPressTimer);
+            longPressTimer = null;
+          }
+        };
+        card.addEventListener('pointerup', cancelPress);
+        card.addEventListener('pointermove', cancelPress);
+        card.addEventListener('pointercancel', cancelPress);
+
+        return card;
+      }
+
+      function renderGrid(gridEl, emptyEl, items, mode) {
+        gridEl.innerHTML = '';
+        if (items.length === 0) {
+          if (emptyEl) emptyEl.classList.remove('hidden');
+          gridEl.classList.add('hidden');
+          return;
+        }
+        if (emptyEl) emptyEl.classList.add('hidden');
+        gridEl.classList.remove('hidden');
+
+        const fragment = document.createDocumentFragment();
+        items.forEach(item => fragment.appendChild(createPosterCard(item, mode)));
+        gridEl.appendChild(fragment);
+      }
+
+      function renderAll() {
+        const wearingItems = state.items.filter(i => i.status === 'wearing');
+        const cleanLight   = state.items.filter(i => i.status === 'clean' && i.category === 'light');
+        const cleanDark    = state.items.filter(i => i.status === 'clean' && i.category === 'dark');
+        const laundryLight = state.items.filter(i => i.status === 'laundry' && i.category === 'light');
+        const laundryDark  = state.items.filter(i => i.status === 'laundry' && i.category === 'dark');
+
+        const totalCleanTab = wearingItems.length + cleanLight.length + cleanDark.length;
+        const totalLaundryTab = laundryLight.length + laundryDark.length;
+
+        els.cleanCountBadge.textContent = totalCleanTab;
+        els.laundryCountBadge.textContent = totalLaundryTab;
+
+        // Верхний блок «На мне сегодня»
+        if (wearingItems.length > 0) {
+          els.wearingSection.classList.remove('hidden');
+          els.wearingCountText.textContent = wearingItems.length;
+          els.allToLaundryBtn.classList.toggle('hidden', wearingItems.length < 2);
+          renderGrid(els.wearingGrid, null, wearingItems, 'wearing');
+        } else {
+          els.wearingSection.classList.add('hidden');
+          els.wearingGrid.innerHTML = '';
+        }
+
+        // Экран «Чистое»
+        els.cleanLightCount.textContent = cleanLight.length;
+        els.cleanDarkCount.textContent = cleanDark.length;
+        renderGrid(els.cleanLightGrid, els.cleanLightEmpty, cleanLight, 'clean');
+        renderGrid(els.cleanDarkGrid, els.cleanDarkEmpty, cleanDark, 'clean');
+
+        // Экран «В стирке»
+        els.laundryLightCount.textContent = laundryLight.length;
+        els.laundryDarkCount.textContent = laundryDark.length;
+
+        if (totalLaundryTab === 0) {
+          els.laundryAllEmpty.classList.remove('hidden');
+          els.laundrySectionsContainer.classList.add('hidden');
+        } else {
+          els.laundryAllEmpty.classList.add('hidden');
+          els.laundrySectionsContainer.classList.remove('hidden');
+          els.washAllLightBtn.classList.toggle('hidden', laundryLight.length === 0);
+          els.washAllDarkBtn.classList.toggle('hidden', laundryDark.length === 0);
+          renderGrid(els.laundryLightGrid, els.laundryLightEmpty, laundryLight, 'laundry');
+          renderGrid(els.laundryDarkGrid, els.laundryDarkEmpty, laundryDark, 'laundry');
+        }
+
+        updateEditModeUI();
+        els.demoCountBadge.textContent = state.items.filter(i => i.isDemo).length;
+      }
+
+      function updateEditModeUI() {
+        const active = state.editMode;
+        els.editModeBanner.classList.toggle('hidden', !active);
+
+        if (active) {
+          els.modalEditModeBadge.textContent = 'Активна';
+          els.modalEditModeBadge.className = 'shrink-0 px-2 py-1 rounded-lg text-[10px] font-extrabold bg-emerald-100 text-emerald-800';
+          els.modalEditModeBtn.className = 'w-full py-3 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 active:scale-[0.98] text-white text-xs font-extrabold flex items-center justify-center gap-2 transition shadow-xs';
+          els.modalEditModeText.textContent = 'Выйти из правки';
+          els.modalEditModeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />';
+        } else {
+          els.modalEditModeBadge.textContent = 'Выкл';
+          els.modalEditModeBadge.className = 'shrink-0 px-2 py-1 rounded-lg text-[10px] font-extrabold bg-slate-200 text-slate-600';
+          els.modalEditModeBtn.className = 'w-full py-3 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-[0.98] text-white text-xs font-extrabold flex items-center justify-center gap-2 transition shadow-xs';
+          els.modalEditModeText.textContent = 'Править';
+          els.modalEditModeIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />';
+        }
+      }
+
+      function setEditMode(enabled) {
+        state.editMode = Boolean(enabled);
+        renderAll();
+      }
+
+      // =========================================================================
+      // 11. НАВИГАЦИЯ ЧЕРЕЗ SCROLL-SNAP (+ ПЛАВНЫЙ ИНДИКАТОР ВКЛАДОК И МЫШЬ НА ПК)
+      // =========================================================================
+      function updateTabVisuals(progress) {
+        const p = Math.max(0, Math.min(1, progress));
+        els.tabPillIndicator.style.transform = `translateX(${p * 100}%)`;
+
+        const isLaundry = p >= 0.5;
+        state.activeTab = isLaundry ? 1 : 0;
+
+        els.tabCleanBtn.classList.toggle('text-slate-900', !isLaundry);
+        els.tabCleanBtn.classList.toggle('text-slate-500', isLaundry);
+        els.tabLaundryBtn.classList.toggle('text-slate-900', isLaundry);
+        els.tabLaundryBtn.classList.toggle('text-slate-500', !isLaundry);
+
+        els.cleanCountBadge.className = !isLaundry
+          ? 'inline-flex items-center justify-center min-w-[17px] h-[17px] px-1 text-[10px] font-extrabold rounded-full bg-emerald-100 text-emerald-700'
+          : 'inline-flex items-center justify-center min-w-[17px] h-[17px] px-1 text-[10px] font-extrabold rounded-full bg-slate-200/90 text-slate-500';
+        els.laundryCountBadge.className = isLaundry
+          ? 'inline-flex items-center justify-center min-w-[17px] h-[17px] px-1 text-[10px] font-extrabold rounded-full bg-sky-100 text-sky-700'
+          : 'inline-flex items-center justify-center min-w-[17px] h-[17px] px-1 text-[10px] font-extrabold rounded-full bg-slate-200/90 text-slate-500';
+      }
+
+      function scrollToTab(tabIndex, smooth = true) {
+        const idx = tabIndex === 1 ? 1 : 0;
+        const width = els.snapContainer.clientWidth || 390;
+        els.snapContainer.scrollTo({
+          left: idx * width,
+          behavior: smooth ? 'smooth' : 'auto',
+        });
+        if (!smooth) updateTabVisuals(idx);
+      }
+
+      let scrollRaf = null;
+      els.snapContainer.addEventListener('scroll', () => {
+        if (scrollRaf) return;
+        scrollRaf = requestAnimationFrame(() => {
+          scrollRaf = null;
+          const width = els.snapContainer.clientWidth || 1;
+          updateTabVisuals(els.snapContainer.scrollLeft / width);
+        });
+      }, { passive: true });
+
+      window.addEventListener('resize', () => {
+        scrollToTab(state.activeTab, false);
+      });
+
+      // Поддержка перетаскивания мышью для теста свайпа на ПК (touch работает нативно через scroll-snap)
+      let mouseDrag = { active: false, startX: 0, startY: 0, startScrollLeft: 0, lockedX: false, suppressClick: false };
+      els.snapContainer.addEventListener('click', (e) => {
+        if (mouseDrag.suppressClick) {
+          e.preventDefault();
+          e.stopPropagation();
+          mouseDrag.suppressClick = false;
+        }
+      }, true);
+
+      els.snapContainer.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return;
+        mouseDrag = {
+          active: true,
+          startX: e.clientX,
+          startY: e.clientY,
+          startScrollLeft: els.snapContainer.scrollLeft,
+          lockedX: false,
+          suppressClick: false,
+        };
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!mouseDrag.active) return;
+        const dx = e.clientX - mouseDrag.startX;
+        const dy = e.clientY - mouseDrag.startY;
+        if (!mouseDrag.lockedX) {
+          if (Math.abs(dx) < 10 && Math.abs(dy) < 10) return;
+          if (Math.abs(dx) > Math.abs(dy) * 1.2) {
+            mouseDrag.lockedX = true;
+            els.snapContainer.style.scrollSnapType = 'none';
+          } else {
+            mouseDrag.active = false;
+            return;
+          }
+        }
+        els.snapContainer.scrollLeft = mouseDrag.startScrollLeft - dx;
+      });
+
+      window.addEventListener('mouseup', (e) => {
+        if (!mouseDrag.active) return;
+        const wasLocked = mouseDrag.lockedX;
+        const dx = e.clientX - mouseDrag.startX;
+        mouseDrag.active = false;
+        mouseDrag.lockedX = false;
+
+        if (!wasLocked) return;
+        if (Math.abs(dx) > 12) {
+          mouseDrag.suppressClick = true;
+          setTimeout(() => { mouseDrag.suppressClick = false; }, 120);
+        }
+
+        const width = els.snapContainer.clientWidth || 390;
+        const targetTab = dx < -45 ? 1 : dx > 45 ? 0 : Math.round(els.snapContainer.scrollLeft / width);
+        els.snapContainer.style.scrollSnapType = 'x mandatory';
+        scrollToTab(targetTab, true);
+      });
+
+      // =========================================================================
+      // 12. СЖАТИЕ ФОТО ЧЕРЕЗ CANVAS ДО 700px (JPEG 0.78, ОЧИСТКА EXIF/GPS)
+      // =========================================================================
+      function compressImageFile(file, maxWidth = 700, quality = 0.78) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onerror = () => reject(new Error('Ошибка чтения файла'));
+          reader.onload = () => {
+            const img = new Image();
+            img.onerror = () => reject(new Error('Неподдерживаемый формат фото'));
+            img.onload = () => {
+              let w = img.width;
+              let h = img.height;
+
+              if (w > maxWidth) {
+                h = Math.round((h * maxWidth) / w);
+                w = maxWidth;
+              }
+              const maxHeight = 960;
+              if (h > maxHeight) {
+                w = Math.round((w * maxHeight) / h);
+                h = maxHeight;
+              }
+
+              const canvas = document.createElement('canvas');
+              canvas.width = w;
+              canvas.height = h;
+              const ctx = canvas.getContext('2d');
+              ctx.fillStyle = '#ffffff';
+              ctx.fillRect(0, 0, w, h);
+              ctx.drawImage(img, 0, 0, w, h);
+
+              // Перерисовка на canvas гарантированно удаляет EXIF и GPS-координаты
+              const dataUrl = canvas.toDataURL('image/jpeg', quality);
+              const approxKb = Math.max(1, Math.round((dataUrl.length * 3) / 4 / 1024));
+              resolve({ dataUrl, approxKb });
+            };
+            img.src = reader.result;
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      // =========================================================================
+      // 13. МОДАЛЬНЫЕ ОКНА: ДОБАВИТЬ (+), РЕДАКТИРОВАТЬ (✎), ЗАЩИТА И БЭКАП
+      // =========================================================================
+      function updateAddCategoryButtons() {
+        const isLight = state.addCategory === 'light';
+        els.addCatLightBtn.className = isLight
+          ? 'py-3 px-3 rounded-2xl border-2 border-slate-900 bg-amber-50 text-slate-900 font-extrabold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition shadow-xs'
+          : 'py-3 px-3 rounded-2xl border-2 border-slate-200 bg-white text-slate-500 font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition';
+        els.addCatDarkBtn.className = !isLight
+          ? 'py-3 px-3 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white font-extrabold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition shadow-xs'
+          : 'py-3 px-3 rounded-2xl border-2 border-slate-200 bg-white text-slate-500 font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition';
+      }
+
+      function openAddModal() {
+        state.addPhotoDataUrl = null;
+        state.addCategory = 'light';
+        els.addItemForm.reset();
+        els.addPhotoPreviewImg.classList.add('hidden');
+        els.addPhotoPreviewImg.src = '';
+        els.addPhotoPlaceholder.classList.remove('hidden');
+        els.addPhotoMetaBadge.classList.add('hidden');
+        els.addPhotoRetakeHint.classList.add('hidden');
+        els.addPhotoErrorMsg.classList.add('hidden');
+        updateAddCategoryButtons();
+        els.addModal.classList.remove('hidden');
+      }
+
+      function closeAddModal() {
+        els.addModal.classList.add('hidden');
+      }
+
+      els.addPhotoInput.addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        els.addPhotoErrorMsg.classList.add('hidden');
+        try {
+          const { dataUrl, approxKb } = await compressImageFile(file, 700, 0.78);
+          state.addPhotoDataUrl = dataUrl;
+          els.addPhotoPreviewImg.src = dataUrl;
+          els.addPhotoPreviewImg.classList.remove('hidden');
+          els.addPhotoPlaceholder.classList.add('hidden');
+          els.addPhotoMetaBadge.textContent = `Сжато • ${approxKb} КБ • без EXIF`;
+          els.addPhotoMetaBadge.classList.remove('hidden');
+          els.addPhotoRetakeHint.classList.remove('hidden');
+        } catch {
+          els.addPhotoErrorMsg.textContent = 'Не удалось обработать фото. Выберите изображение JPG/PNG.';
+          els.addPhotoErrorMsg.classList.remove('hidden');
+        }
+      });
+
+      els.addCatLightBtn.addEventListener('click', () => {
+        state.addCategory = 'light';
+        updateAddCategoryButtons();
+      });
+      els.addCatDarkBtn.addEventListener('click', () => {
+        state.addCategory = 'dark';
+        updateAddCategoryButtons();
+      });
+
+      els.addItemForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!state.addPhotoDataUrl) {
+          els.addPhotoErrorMsg.textContent = 'Сначала выберите или снимите фото одежды';
+          els.addPhotoErrorMsg.classList.remove('hidden');
+          return;
+        }
+
+        const newItem = {
+          id: 'item_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+          name: els.addItemNameInput.value.trim(),
+          category: state.addCategory,
+          status: 'clean',
+          isDemo: false,
+          photoDataUrl: state.addPhotoDataUrl,
+          createdAt: Date.now(),
+        };
+
+        state.items.push(newItem);
+        closeAddModal();
+        scrollToTab(0, true);
+        renderAll();
+        showToast(`Добавлено в «${newItem.category === 'light' ? 'Светлое' : 'Тёмное'}»`, false);
+        await persistStateChanges(true);
+      });
+
+      // --- Полное редактирование вещи ---
+      function updateEditModalToggleButtons() {
+        const isLight = state.editCategory === 'light';
+        els.editCatLightBtn.className = isLight
+          ? 'py-3 px-3 rounded-2xl border-2 border-slate-900 bg-amber-50 text-slate-900 font-extrabold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition shadow-xs'
+          : 'py-3 px-3 rounded-2xl border-2 border-slate-200 bg-white text-slate-500 font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition';
+
+        els.editCatDarkBtn.className = !isLight
+          ? 'py-3 px-3 rounded-2xl border-2 border-slate-900 bg-slate-900 text-white font-extrabold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition shadow-xs'
+          : 'py-3 px-3 rounded-2xl border-2 border-slate-200 bg-white text-slate-500 font-bold text-sm flex items-center justify-center gap-2 active:scale-[0.98] transition';
+
+        document.querySelectorAll('[data-edit-status]').forEach((btn) => {
+          const active = state.editStatus === btn.dataset.editStatus;
+          btn.className = active
+            ? 'py-2.5 px-2 rounded-xl border-2 border-slate-900 bg-slate-900 text-white text-xs font-extrabold transition active:scale-95'
+            : 'py-2.5 px-2 rounded-xl border-2 border-slate-200 bg-white text-slate-600 text-xs font-bold transition active:scale-95';
+        });
+      }
+
+      function openEditItemModal(itemId) {
+        const item = state.items.find(i => i.id === itemId);
+        if (!item) return;
+
+        state.editingItemId = item.id;
+        state.editCategory = item.category;
+        state.editStatus = item.status;
+        state.editPhotoDataUrl = item.photoDataUrl || null;
+        state.editPhotoChanged = false;
+
+        els.editPhotoInput.value = '';
+        els.editPhotoErrorMsg.classList.add('hidden');
+        els.editPhotoMetaBadge.classList.add('hidden');
+        els.editItemNameInput.value = item.name || '';
+
+        if (item.photoDataUrl) {
+          els.editPhotoPreviewImg.src = item.photoDataUrl;
+          els.editPhotoPreviewImg.classList.remove('hidden');
+          els.editPhotoSvgWrap.classList.add('hidden');
+        } else {
+          els.editPhotoSvgWrap.innerHTML = renderGarmentSVG(item.svgType);
+          els.editPhotoSvgWrap.classList.remove('hidden');
+          els.editPhotoPreviewImg.classList.add('hidden');
+        }
+
+        updateEditModalToggleButtons();
+        els.editItemModal.classList.remove('hidden');
+      }
+
+      function closeEditItemModal() {
+        els.editItemModal.classList.add('hidden');
+        state.editingItemId = null;
+      }
+
+      els.editPhotoInput.addEventListener('change', async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        els.editPhotoErrorMsg.classList.add('hidden');
+        try {
+          const { dataUrl, approxKb } = await compressImageFile(file, 700, 0.78);
+          state.editPhotoDataUrl = dataUrl;
+          state.editPhotoChanged = true;
+          els.editPhotoPreviewImg.src = dataUrl;
+          els.editPhotoPreviewImg.classList.remove('hidden');
+          els.editPhotoSvgWrap.classList.add('hidden');
+          els.editPhotoMetaBadge.textContent = `Новое • ${approxKb} КБ`;
+          els.editPhotoMetaBadge.classList.remove('hidden');
+        } catch {
+          els.editPhotoErrorMsg.textContent = 'Не удалось обработать фото. Попробуйте другой файл.';
+          els.editPhotoErrorMsg.classList.remove('hidden');
+        }
+      });
+
+      els.editCatLightBtn.addEventListener('click', () => {
+        state.editCategory = 'light';
+        updateEditModalToggleButtons();
+      });
+      els.editCatDarkBtn.addEventListener('click', () => {
+        state.editCategory = 'dark';
+        updateEditModalToggleButtons();
+      });
+      document.querySelectorAll('[data-edit-status]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          state.editStatus = btn.dataset.editStatus;
+          updateEditModalToggleButtons();
+        });
+      });
+
+      els.editItemForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const idx = state.items.findIndex(i => i.id === state.editingItemId);
+        if (idx === -1) return;
+
+        saveUndoPoint();
+        const prevItem = state.items[idx];
+        const colorChanged = prevItem.category !== state.editCategory;
+
+        const updatedItem = {
+          ...prevItem,
+          name: els.editItemNameInput.value.trim(),
+          category: state.editCategory,
+          status: state.editStatus,
+        };
+
+        if (state.editPhotoChanged && state.editPhotoDataUrl) {
+          updatedItem.photoDataUrl = state.editPhotoDataUrl;
+          updatedItem.isDemo = false;
+          delete updatedItem.svgType;
+        }
+
+        state.items[idx] = updatedItem;
+        closeEditItemModal();
+        renderAll();
+
+        const msg = colorChanged
+          ? `Перенесено в «${updatedItem.category === 'dark' ? 'Тёмное' : 'Светлое'}»`
+          : 'Изменения сохранены';
+        showToast(msg, true);
+        await persistStateChanges(true);
+      });
+
+      els.editDeleteBtn.addEventListener('click', async () => {
+        const idToDelete = state.editingItemId;
+        closeEditItemModal();
+        if (idToDelete) await deleteItem(idToDelete);
+      });
+
+      // --- Окно «Защита и бэкап» ---
+      async function openProtectionModal() {
+        els.backupErrorMsg.classList.add('hidden');
+        els.protectionModal.classList.remove('hidden');
+        await refreshProtectionModalData();
+      }
+
+      function closeProtectionModal() {
+        els.protectionModal.classList.add('hidden');
+      }
+
+      // =========================================================================
+      // 14. TOAST-УВЕДОМЛЕНИЯ (3.5 СЕК + КНОПКА «ОТМЕНИТЬ»)
+      // =========================================================================
+      function showToast(message, showUndo = false) {
+        if (state.toastTimer) clearTimeout(state.toastTimer);
+        els.toastMessage.textContent = message;
+        els.toastUndoBtn.classList.toggle('hidden', !showUndo);
+        els.toastBox.classList.remove('hidden');
+        els.toastBox.classList.add('flex');
+
+        state.toastTimer = setTimeout(() => {
+          hideToast();
+        }, 3500);
+      }
+
+      function hideToast() {
+        if (state.toastTimer) clearTimeout(state.toastTimer);
+        els.toastBox.classList.add('hidden');
+        els.toastBox.classList.remove('flex');
+      }
+
+      // =========================================================================
+      // 15. ЗАГРУЗКА ДАННЫХ И ПРИВЯЗКА ВСЕХ СОБЫТИЙ
+      // =========================================================================
+      async function loadInitialData() {
+        await Storage.init();
+
+        const initialized = await Storage.get('initialized');
+        const savedItems = await Storage.get('items');
+        const savedBackupMeta = await Storage.get('backupMeta');
+        const savedPinHash = await Storage.get('pinHash');
+
+        if (savedBackupMeta && typeof savedBackupMeta === 'object') {
+          state.backupMeta = {
+            lastBackupAt: savedBackupMeta.lastBackupAt || null,
+            changesSinceBackup: Number(savedBackupMeta.changesSinceBackup) || 0,
+          };
+        }
+
+        if (typeof savedPinHash === 'string' && savedPinHash.length > 0) {
+          state.pinHash = savedPinHash;
+          try { localStorage.setItem(LS_PIN_FLAG_KEY, '1'); } catch {}
+          openPinOverlay('unlock');
+        } else {
+          state.pinHash = null;
+          try { localStorage.removeItem(LS_PIN_FLAG_KEY); } catch {}
+          els.pinOverlay.classList.add('hidden');
+        }
+
+        if (!initialized) {
+          state.items = DEMO_ITEMS_TEMPLATE.map(i => ({ ...i }));
+          await Storage.set('items', state.items);
+          await Storage.set('initialized', true);
+        } else if (Array.isArray(savedItems)) {
+          state.items = savedItems;
+        }
+
+        renderAll();
+        updateProtectionIndicatorDot();
+
+        // Автоматический запрос постоянного хранилища при старте
+        await requestPersistentStorage(false);
+        updateProtectionIndicatorDot();
+      }
+
+      // Шапка и основные кнопки
+      els.tabCleanBtn.addEventListener('click', () => scrollToTab(0, true));
+      els.tabLaundryBtn.addEventListener('click', () => scrollToTab(1, true));
+      els.bannerDoneBtn.addEventListener('click', () => setEditMode(false));
+
+      els.modalEditModeBtn.addEventListener('click', () => {
+        const nextMode = !state.editMode;
+        setEditMode(nextMode);
+        closeProtectionModal();
+        showToast(nextMode ? 'Режим правки включён' : 'Режим правки выключен', false);
+      });
+
+      els.closeEditItemModalBtn.addEventListener('click', closeEditItemModal);
+      els.editItemModal.addEventListener('click', (e) => {
+        if (e.target === els.editItemModal) closeEditItemModal();
+      });
+
+      els.protectionBtn.addEventListener('click', openProtectionModal);
+      els.closeProtectionModalBtn.addEventListener('click', closeProtectionModal);
+      els.protectionModal.addEventListener('click', (e) => {
+        if (e.target === els.protectionModal) closeProtectionModal();
+      });
+
+      // Кнопки внутри «Защита и бэкап»
+      els.nativeInstallBtn.addEventListener('click', async () => {
+        if (!state.deferredInstallPrompt) return;
+        try {
+          state.deferredInstallPrompt.prompt();
+          const { outcome } = await state.deferredInstallPrompt.userChoice;
+          state.deferredInstallPrompt = null;
+          updatePWAStatusUI();
+          if (outcome === 'accepted') {
+            showToast('Установка запущена', false);
+          }
+        } catch {
+          els.nativeInstallBtn.classList.add('hidden');
+        }
+      });
+
+      els.checkPersistBtn.addEventListener('click', async () => {
+        await requestPersistentStorage(true);
+        await updateStorageEstimateUI();
+      });
+
+      els.shareBackupBtn.addEventListener('click', handleShareBackup);
+      els.downloadBackupBtn.addEventListener('click', handleDownloadBackup);
+      els.restoreBackupInput.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        els.restoreBackupInput.value = '';
+        handleRestoreBackupFile(file);
+      });
+
+      els.enablePinBtn.addEventListener('click', () => openPinOverlay('setup'));
+      els.changePinBtn.addEventListener('click', () => openPinOverlay('change_verify'));
+      els.disablePinBtn.addEventListener('click', () => openPinOverlay('disable_verify'));
+      els.lockNowBtn.addEventListener('click', () => {
+        closeProtectionModal();
+        openPinOverlay('unlock');
+      });
+
+      els.removeDemoBtn.addEventListener('click', removeDemoItems);
+      els.resetDemoBtn.addEventListener('click', resetDemoItems);
+
+      // Массовые действия и Undo
+      els.allToLaundryBtn.addEventListener('click', sendAllWearingToLaundry);
+      els.washAllLightBtn.addEventListener('click', () => washAllByCategory('light'));
+      els.washAllDarkBtn.addEventListener('click', () => washAllByCategory('dark'));
+      els.toastUndoBtn.addEventListener('click', undoLastAction);
+
+      window.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeAddModal();
+          closeEditItemModal();
+          closeProtectionModal();
+          if (state.pinFlow && state.pinFlow !== 'unlock') closePinOverlay();
+        }
+      });
+
+      // Старт
+      updateTabVisuals(0);
+      renderAll();
+      loadInitialData();
+    })();
+  </script>
+</body>
+</html>
